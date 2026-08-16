@@ -1,0 +1,597 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local VirtualUser = game:GetService("VirtualUser")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local character
+local rootPart
+
+local function updateCharacter(char)
+    character = char
+    rootPart = char:WaitForChild("HumanoidRootPart")
+end
+
+updateCharacter(player.Character or player.CharacterAdded:Wait())
+
+player.CharacterAdded:Connect(function(char)
+    updateCharacter(char)
+end)
+
+-- Leaderstats
+local leaderstats = player:WaitForChild("leaderstats", 5)
+
+local moneyValue
+
+if leaderstats then
+    moneyValue =
+        leaderstats:FindFirstChild("Money")
+        or leaderstats:FindFirstChild("Cash")
+        or leaderstats:FindFirstChild("Coins")
+end
+
+-- Remote
+local remoteFunction
+
+pcall(function()
+    remoteFunction =
+        ReplicatedStorage
+        :WaitForChild("Paper", 5)
+        :WaitForChild("Remotes", 5)
+        :WaitForChild("__remotefunction", 5)
+end)
+
+-- Configuration
+local correctKey = "GGGR@23LO"
+
+local config = {
+    AutoEggs = false,
+    AutoMoney = false,
+    AutoBuy = false,
+    AutoLucky = false,
+    PullBuyButton = false,
+    AntiAFK = true
+}
+
+local chickenCost1 = 20
+local chickenCost5 = 100
+local maxEggs = 30
+local eggCount = 0
+
+--------------------------------------------------
+-- Utility
+--------------------------------------------------
+
+local function teleportTo(targetPart)
+    if not rootPart or not targetPart then
+        return
+    end
+
+    if targetPart:IsA("BasePart") then
+        rootPart.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
+
+    elseif targetPart:IsA("Model") and targetPart.PrimaryPart then
+        rootPart.CFrame =
+            targetPart.PrimaryPart.CFrame + Vector3.new(0, 3, 0)
+    end
+end
+
+local function isButtonRed(buttonPart)
+    if not buttonPart or not buttonPart:IsA("BasePart") then
+        return false
+    end
+
+    local color = buttonPart.Color
+
+    if buttonPart.BrickColor == BrickColor.new("Bright red") then
+        return true
+    end
+
+    if color.R > 0.7 and color.G < 0.3 and color.B < 0.3 then
+        return true
+    end
+
+    return false
+end
+
+--------------------------------------------------
+-- Main GUI
+--------------------------------------------------
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DeltaFixMainGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = playerGui
+
+--------------------------------------------------
+-- Main Frame
+--------------------------------------------------
+
+local MainFrame = Instance.new("Frame")
+local MainCorner = Instance.new("UICorner")
+local MainGradient = Instance.new("UIGradient")
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainFrame.Position = UDim2.new(0.5, -190, 0.5, -210)
+MainFrame.Size = UDim2.new(0, 380, 0, 420)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Visible = false
+
+MainGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(
+        0,
+        Color3.fromRGB(18, 18, 26)
+    ),
+
+    ColorSequenceKeypoint.new(
+        1,
+        Color3.fromRGB(8, 8, 12)
+    )
+})
+
+MainGradient.Rotation = 45
+MainGradient.Parent = MainFrame
+
+MainCorner.CornerRadius = UDim.new(0, 18)
+MainCorner.Parent = MainFrame
+
+--------------------------------------------------
+-- Toggle Icon
+--------------------------------------------------
+
+local ToggleIconButton = Instance.new("TextButton")
+local IconCorner = Instance.new("UICorner")
+
+ToggleIconButton.Name = "ToggleIconButton"
+ToggleIconButton.Parent = ScreenGui
+ToggleIconButton.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+ToggleIconButton.Position = UDim2.new(0.02, 0, 0.2, 0)
+ToggleIconButton.Size = UDim2.new(0, 45, 0, 45)
+ToggleIconButton.Font = Enum.Font.GothamBold
+ToggleIconButton.Text = "⚡"
+ToggleIconButton.TextColor3 = Color3.fromRGB(255, 204, 0)
+ToggleIconButton.TextSize = 22
+ToggleIconButton.Active = true
+ToggleIconButton.Draggable = true
+ToggleIconButton.Visible = false
+
+IconCorner.CornerRadius = UDim.new(0, 12)
+IconCorner.Parent = ToggleIconButton
+
+ToggleIconButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+--------------------------------------------------
+-- Dashboard
+--------------------------------------------------
+
+local DashboardTitle = Instance.new("TextLabel")
+
+DashboardTitle.Parent = MainFrame
+DashboardTitle.BackgroundTransparency = 1
+DashboardTitle.Position = UDim2.new(0.06, 0, 0.03, 0)
+DashboardTitle.Size = UDim2.new(0.88, 0, 0, 30)
+DashboardTitle.Font = Enum.Font.GothamBold
+DashboardTitle.Text = "DELTA HUB // ULTIMATE"
+DashboardTitle.TextColor3 = Color3.fromRGB(255, 204, 0)
+DashboardTitle.TextSize = 16
+DashboardTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+--------------------------------------------------
+-- FPS / Ping
+--------------------------------------------------
+
+local StatLabel = Instance.new("TextLabel")
+
+StatLabel.Parent = MainFrame
+StatLabel.BackgroundTransparency = 1
+StatLabel.Position = UDim2.new(0.06, 0, 0.10, 0)
+StatLabel.Size = UDim2.new(0.88, 0, 0, 18)
+StatLabel.Font = Enum.Font.GothamMedium
+StatLabel.Text = "FPS: 0 | Ping: 0 ms"
+StatLabel.TextColor3 = Color3.fromRGB(0, 229, 255)
+StatLabel.TextSize = 11
+StatLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+--------------------------------------------------
+-- Status
+--------------------------------------------------
+
+local StatusLabel = Instance.new("TextLabel")
+
+StatusLabel.Parent = MainFrame
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Position = UDim2.new(0.06, 0, 0.15, 0)
+StatusLabel.Size = UDim2.new(0.88, 0, 0, 22)
+
+-- FIX:
+-- Enum.Font.GothamStatusLabel ไม่มีอยู่จริง
+StatusLabel.Font = Enum.Font.Gotham
+
+StatusLabel.Text = "Status: Operational"
+StatusLabel.TextColor3 = Color3.fromRGB(160, 160, 180)
+StatusLabel.TextSize = 12
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+--------------------------------------------------
+-- Buttons
+--------------------------------------------------
+
+local function createButton(posY, text)
+    local btn = Instance.new("TextButton")
+    local corner = Instance.new("UICorner")
+
+    btn.Parent = MainFrame
+    btn.Position = UDim2.new(0.06, 0, posY, 0)
+    btn.Size = UDim2.new(0.88, 0, 0, 36)
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+    btn.Font = Enum.Font.GothamBold
+    btn.Text = text .. " [OFF]"
+    btn.TextColor3 = Color3.fromRGB(230, 230, 250)
+    btn.TextSize = 12
+
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+
+    return btn
+end
+
+local BtnEggs =
+    createButton(0.23, "Auto Farm Eggs")
+
+local BtnMoney =
+    createButton(0.32, "Auto Collect Money")
+
+local BtnBuy =
+    createButton(0.41, "AI Smart Buy Chicken")
+
+local BtnLucky =
+    createButton(0.50, "Auto Open Lucky Block")
+
+local BtnPull =
+    createButton(0.59, "Pull BuyChicken to Me")
+
+--------------------------------------------------
+-- Toggle
+--------------------------------------------------
+
+local function toggleState(btn, configKey, name)
+    config[configKey] = not config[configKey]
+
+    if config[configKey] then
+        btn.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
+        btn.Text = name .. " [ON]"
+    else
+        btn.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+        btn.Text = name .. " [OFF]"
+    end
+end
+
+BtnEggs.MouseButton1Click:Connect(function()
+    toggleState(
+        BtnEggs,
+        "AutoEggs",
+        "Auto Farm Eggs"
+    )
+end)
+
+BtnMoney.MouseButton1Click:Connect(function()
+    toggleState(
+        BtnMoney,
+        "AutoMoney",
+        "Auto Collect Money"
+    )
+end)
+
+BtnBuy.MouseButton1Click:Connect(function()
+    toggleState(
+        BtnBuy,
+        "AutoBuy",
+        "AI Smart Buy Chicken"
+    )
+end)
+
+BtnLucky.MouseButton1Click:Connect(function()
+    toggleState(
+        BtnLucky,
+        "AutoLucky",
+        "Auto Open Lucky Block"
+    )
+end)
+
+BtnPull.MouseButton1Click:Connect(function()
+    toggleState(
+        BtnPull,
+        "Pull BuyChicken to Me"
+    )
+end)
+
+--------------------------------------------------
+-- Key Frame
+--------------------------------------------------
+
+local KeyFrame = Instance.new("Frame")
+local KeyCorner = Instance.new("UICorner")
+local KeyGradient = Instance.new("UIGradient")
+
+local KeyTitle = Instance.new("TextLabel")
+local KeyTextBox = Instance.new("TextBox")
+local KeyBoxCorner = Instance.new("UICorner")
+
+local BtnCheckKey = Instance.new("TextButton")
+local BtnCheckCorner = Instance.new("UICorner")
+
+local KeyStatus = Instance.new("TextLabel")
+
+KeyFrame.Name = "KeyFrame"
+KeyFrame.Parent = ScreenGui
+KeyFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+KeyFrame.Position = UDim2.new(0.5, -160, 0.5, -115)
+KeyFrame.Size = UDim2.new(0, 320, 0, 230)
+KeyFrame.Active = true
+KeyFrame.Draggable = true
+
+KeyGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(
+        0,
+        Color3.fromRGB(24, 24, 32)
+    ),
+
+    ColorSequenceKeypoint.new(
+        1,
+        Color3.fromRGB(12, 12, 16)
+    )
+})
+
+KeyGradient.Rotation = 45
+KeyGradient.Parent = KeyFrame
+
+KeyCorner.CornerRadius = UDim.new(0, 16)
+KeyCorner.Parent = KeyFrame
+
+--------------------------------------------------
+-- Key Title
+--------------------------------------------------
+
+KeyTitle.Parent = KeyFrame
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Position = UDim2.new(0, 0, 0.08, 0)
+KeyTitle.Size = UDim2.new(1, 0, 0, 30)
+KeyTitle.Font = Enum.Font.GothamBold
+KeyTitle.Text = "SECURE ACCESS"
+KeyTitle.TextColor3 = Color3.fromRGB(255, 204, 0)
+KeyTitle.TextSize = 20
+
+--------------------------------------------------
+-- Key Input
+--------------------------------------------------
+
+KeyTextBox.Parent = KeyFrame
+KeyTextBox.Position = UDim2.new(0.1, 0, 0.32, 0)
+KeyTextBox.Size = UDim2.new(0.8, 0, 0, 45)
+KeyTextBox.BackgroundColor3 = Color3.fromRGB(35, 35, 48)
+KeyTextBox.Font = Enum.Font.Gotham
+KeyTextBox.PlaceholderText = "Enter Activation Key..."
+KeyTextBox.Text = ""
+KeyTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyTextBox.TextSize = 14
+
+KeyBoxCorner.CornerRadius = UDim.new(0, 10)
+KeyBoxCorner.Parent = KeyTextBox
+
+--------------------------------------------------
+-- Verify Button
+--------------------------------------------------
+
+BtnCheckKey.Parent = KeyFrame
+BtnCheckKey.Position = UDim2.new(0.1, 0, 0.58, 0)
+BtnCheckKey.Size = UDim2.new(0.8, 0, 0, 42)
+BtnCheckKey.BackgroundColor3 = Color3.fromRGB(0, 122, 255)
+BtnCheckKey.Font = Enum.Font.GothamBold
+BtnCheckKey.Text = "VERIFY KEY"
+BtnCheckKey.TextColor3 = Color3.fromRGB(255, 255, 255)
+BtnCheckKey.TextSize = 15
+
+BtnCheckCorner.CornerRadius = UDim.new(0, 10)
+BtnCheckCorner.Parent = BtnCheckKey
+
+--------------------------------------------------
+-- Key Status
+--------------------------------------------------
+
+KeyStatus.Parent = KeyFrame
+KeyStatus.BackgroundTransparency = 1
+KeyStatus.Position = UDim2.new(0, 0, 0.82, 0)
+KeyStatus.Size = UDim2.new(1, 0, 0, 25)
+KeyStatus.Font = Enum.Font.GothamItalic
+KeyStatus.Text = "Awaiting authorization..."
+KeyStatus.TextColor3 = Color3.fromRGB(140, 140, 160)
+KeyStatus.TextSize = 12
+
+--------------------------------------------------
+-- Verify Key
+--------------------------------------------------
+
+BtnCheckKey.MouseButton1Click:Connect(function()
+
+    if KeyTextBox.Text ~= correctKey then
+        KeyStatus.TextColor3 = Color3.fromRGB(255, 59, 48)
+        KeyStatus.Text = "Invalid Key, Try Again."
+        KeyTextBox.Text = ""
+        return
+    end
+
+    KeyStatus.TextColor3 = Color3.fromRGB(0, 255, 0)
+    KeyStatus.Text = "Authorized! Launching..."
+
+    task.wait(0.8)
+
+    if KeyFrame then
+        KeyFrame:Destroy()
+    end
+
+    MainFrame.Visible = true
+    ToggleIconButton.Visible = true
+
+    StatusLabel.Text = "Status: Operational"
+
+    --------------------------------------------------
+    -- Pull BuyChickens
+    --------------------------------------------------
+
+    task.spawn(function()
+        while task.wait(0.2) do
+
+            if config.PullBuyButton then
+
+                pcall(function()
+
+                    if not rootPart then
+                        return
+                    end
+
+                    local plots = workspace:FindFirstChild("Plots")
+
+                    if not plots then
+                        return
+                    end
+
+                    local plot = plots:FindFirstChild("BBBR17k")
+
+                    if not plot then
+                        return
+                    end
+
+                    local buttons = plot:FindFirstChild("Buttons")
+
+                    if not buttons then
+                        return
+                    end
+
+                    local buyTarget =
+                        buttons:FindFirstChild("BuyChickens")
+
+                    if not buyTarget then
+                        return
+                    end
+
+                    if buyTarget:IsA("BasePart") then
+
+                        buyTarget.CFrame = rootPart.CFrame
+
+                    elseif buyTarget:IsA("Model") then
+
+                        if buyTarget.PrimaryPart then
+                            buyTarget:SetPrimaryPartCFrame(
+                                rootPart.CFrame
+                            )
+                        else
+                            local buttonPart =
+                                buyTarget:FindFirstChild("Button")
+
+                            if buttonPart
+                                and buttonPart:IsA("BasePart") then
+
+                                buttonPart.CFrame =
+                                    rootPart.CFrame
+                            end
+                        end
+                    end
+
+                end)
+
+            end
+        end
+    end)
+
+    --------------------------------------------------
+    -- Auto Lucky Block
+    --------------------------------------------------
+
+    task.spawn(function()
+
+        while task.wait(0.3) do
+
+            if config.AutoLucky
+                and remoteFunction then
+
+                pcall(function()
+
+                    remoteFunction:InvokeServer(
+                        "Open Lucky Block"
+                    )
+
+                end)
+
+            end
+        end
+
+    end)
+
+    --------------------------------------------------
+    -- FPS
+    --------------------------------------------------
+
+    local frames = 0
+    local lastTime = tick()
+
+    RunService.RenderStepped:Connect(function()
+
+        frames += 1
+
+        local now = tick()
+
+        if now - lastTime >= 1 then
+
+            local fps = frames
+            frames = 0
+            lastTime = now
+
+            local ping = 0
+
+            pcall(function()
+                ping =
+                    math.floor(
+                        player:GetNetworkPing() * 1000
+                    )
+            end)
+
+            StatLabel.Text =
+                "FPS: "
+                .. tostring(fps)
+                .. " | Ping: "
+                .. tostring(ping)
+                .. " ms"
+        end
+
+    end)
+
+    --------------------------------------------------
+    -- Anti AFK
+    --------------------------------------------------
+
+    if config.AntiAFK then
+
+        pcall(function()
+
+            player.Idled:Connect(function()
+
+                VirtualUser:CaptureController()
+
+                VirtualUser:ClickButton2(
+                    Vector2.new(0, 0)
+                )
+
+            end)
+
+        end)
+
+    end
+
+end)
