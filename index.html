@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>GLOBAL NEXUS: PRO-GAME MATRIX</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Prompt:wght@300;400;600&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Prompt', sans-serif;
+            background: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+
+        .cyber-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .neon-glow-cyan {
+            box-shadow:
+                0 0 15px rgba(6, 182, 212, 0.5),
+                inset 0 0 15px rgba(6, 182, 212, 0.2);
+        }
+
+        .neon-glow-magenta {
+            box-shadow:
+                0 0 20px rgba(236, 72, 153, 0.6);
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    rgba(18, 16, 16, 0) 50%,
+                    rgba(0, 0, 0, 0.25) 50%
+                );
+
+            background-size: 100% 4px;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .cyber-grid {
+            background-image:
+                linear-gradient(
+                    to right,
+                    rgba(31, 41, 55, 0.5) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    to bottom,
+                    rgba(31, 41, 55, 0.5) 1px,
+                    transparent 1px
+                );
+
+            background-size: 4rem 4rem;
+
+            mask-image:
+                radial-gradient(
+                    ellipse 60% 50% at 50% 0%,
+                    #000 70%,
+                    transparent 100%
+                );
+        }
+
+        @keyframes pulse-fast {
+            0%, 100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.9;
+            }
+        }
+
+        .animate-pulse-fast {
+            animation: pulse-fast 1.5s infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(100%);
+            }
+        }
+
+        .scan-effect {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(34, 211, 238, 0.8);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.9);
+            animation: scan 1.2s linear infinite;
+        }
+
+        .game-card {
+            transition:
+                transform 0.35s ease,
+                border-color 0.35s ease,
+                box-shadow 0.35s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-7px);
+        }
+
+        .modal-backdrop {
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+
+<body
+    x-data="cyberSystem()"
+    class="min-h-screen selection:bg-cyan-500 selection:text-black"
+>
+
+    <!-- BACKGROUND -->
+    <div class="fixed inset-0 bg-slate-950 -z-30"></div>
+
+    <div
+        class="fixed inset-0 -z-20 opacity-40"
+        style="
+            background:
+                radial-gradient(
+                    ellipse at center,
+                    rgba(15, 23, 42, 0.9) 0%,
+                    rgba(3, 7, 18, 1) 60%,
+                    #000 100%
+                );
+        "
+    ></div>
+
+    <div class="fixed inset-0 cyber-grid opacity-20 -z-10"></div>
+
+    <div class="scanlines opacity-30"></div>
+
+    <!-- MAIN -->
+    <div class="container mx-auto max-w-7xl px-4 py-8 relative z-10">
+
+        <!-- HEADER -->
+        <header class="text-center mb-12 border-b border-cyan-500/20 pb-8 relative">
+
+            <div
+                class="absolute top-0 left-1/2 -translate-x-1/2
+                       w-48 h-1 bg-cyan-500 neon-glow-cyan"
+            ></div>
+
+            <h1
+                class="
+                    cyber-font
+                    text-4xl md:text-6xl
+                    font-black
+                    tracking-widest
+                    bg-clip-text
+                    text-transparent
+                    bg-gradient-to-r
+                    from-cyan-400
+                    via-blue-500
+                    to-pink-500
+                    mb-3
+                "
+            >
+                NEXUS<span class="text-pink-500">.</span>CORE
+            </h1>
+
+            <p
+                class="
+                    text-cyan-400
+                    cyber-font
+                    text-xs md:text-sm
+                    tracking-[0.3em]
+                    font-bold
+                    uppercase
+                    animate-pulse-fast
+                "
+            >
+                [ GLOBAL PRO-GAME MATRIX V4.8 ]
+            </p>
+
+            <p class="text-gray-500 text-sm mt-4">
+                Game discovery & information network
+            </p>
+
+        </header>
+
+        <!-- SEARCH PANEL -->
+        <section
+            class="
+                bg-gray-950/80
+                border border-cyan-500/30
+                rounded-xl
+                p-6
+                mb-12
+                neon-glow-cyan
+                backdrop-blur-md
+            "
+        >
+
+            <div class="flex flex-col md:flex-row gap-4 items-center">
+
+                <!-- SEARCH -->
+                <div class="relative w-full md:flex-grow">
+
+                    <span
+                        class="
+                            absolute
+                            inset-y-0
+                            left-0
+                            flex
+                            items-center
+                            pl-4
+                            text-cyan-400
+                        "
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="
+                                    M21 21l-6-6
+                                    m2-5
+                                    a7 7 0 11-14 0
+                                    7 7 0 0114 0z
+                                "
+                            ></path>
+                        </svg>
+                    </span>
+
+                    <input
+                        type="text"
+                        x-model="searchQuery"
+                        placeholder="ค้นหาเกม หรือคีย์เวิร์ด..."
+                        class="
+                            w-full
+                            bg-black/60
+                            border border-cyan-500/40
+                            rounded-lg
+                            pl-12
+                            pr-4
+                            py-3.5
+                            text-cyan-300
+                            placeholder-cyan-700
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-cyan-400
+                            transition-all
+                            duration-300
+                            cyber-font
+                        "
+                    >
+
+                </div>
+
+                <!-- FILTER -->
+                <div
+                    class="
+                        flex
+                        gap-2
+                        w-full
+                        md:w-auto
+                        overflow-x-auto
+                        pb-2
+                        md:pb-0
+                    "
+                >
+
+                    <template
+                        x-for="plat in platforms"
+                        :key="plat"
+                    >
+
+                        <button
+                            @click="activePlatform = plat"
+                            :class="
+                                activePlatform === plat
+                                ? 'bg-cyan-500 text-black border-transparent shadow-[0_0_15px_rgba(6,182,212,0.6)] font-bold'
+                                : 'bg-black/40 text-cyan-400 border-cyan-500/30 hover:bg-cyan-950/30'
+                            "
+                            class="
+                                px-5
+                                py-3
+                                rounded-lg
+                                border
+                                text-xs
+                                cyber-font
+                                tracking-widest
+                                transition-all
+                                duration-300
+                                uppercase
+                                whitespace-nowrap
+                            "
+                        >
+                            <span x-text="plat"></span>
+                        </button>
+
+                    </template>
+
+                </div>
+
+            </div>
+
+            <!-- STATUS -->
+            <div
+                class="
+                    mt-4
+                    flex
+                    flex-col
+                    sm:flex-row
+                    gap-2
+                    justify-between
+                    text-xs
+                    text-gray-500
+                    border-t
+                    border-gray-900
+                    pt-4
+                    cyber-font
+                "
+            >
+
+                <div>
+                    GLOBAL NODE STATUS:
+                    <span class="text-green-400 font-bold">
+                        ONLINE
+                    </span>
+                </div>
+
+                <div>
+                    SYNCHRONIZED GAMES:
+                    <span
+                        class="text-cyan-400 font-bold"
+                        x-text="filteredGames.length"
+                    ></span>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- EMPTY STATE -->
+        <template x-if="filteredGames.length === 0">
+
+            <div
+                class="
+                    text-center
+                    py-20
+                    border
+                    border-cyan-500/20
+                    rounded-2xl
+                    bg-gray-950/70
+                "
+            >
+
+                <div class="text-5xl mb-5">
+                    ⚠️
+                </div>
+
+                <h2
+                    class="
+                        cyber-font
+                        text-xl
+                        text-cyan-400
+                        mb-3
+                    "
+                >
+                    NO COMPATIBLE DATA MATRIX FOUND
+                </h2>
+
+                <p class="text-gray-500">
+                    ไม่พบข้อมูลเกมที่ตรงกับคำค้นหา
+                </p>
+
+                <button
+                    @click="searchQuery = ''; activePlatform = 'ALL'"
+                    class="
+                        mt-6
+                        px-5
+                        py-3
+                        rounded-lg
+                        border
+                        border-cyan-500/50
+                        text-cyan-400
+                        hover:bg-cyan-500
+                        hover:text-black
+                        transition
+                    "
+                >
+                    RESET FILTER
+                </button>
+
+            </div>
+
+        </template>
+
+        <!-- GAME GRID -->
+        <main
+            x-show="filteredGames.length > 0"
+            class="
+                grid
+                grid-cols-1
+                sm:grid-cols-2
+                lg:grid-cols-3
+                gap-8
+            "
+        >
+
+            <template
+                x-for="game in filteredGames"
+                :key="game.id"
+            >
+
+                <article
+                    class="
+                        game-card
+                        group
+                        bg-gray-950/90
+                        border-2
+                        border-slate-800
+                        hover:border-cyan-400
+                        rounded-2xl
+                        overflow-hidden
+                        relative
+                        flex
+                        flex-col
+                    "
+                    :class="
+                        game.decrypted
+                        ? 'border-pink-500/50 shadow-[0_0_20px_rgba(236,72,153,0.15)]'
+                        : ''
+                    "
+                >
+
+                    <!-- PLATFORM -->
+                    <div
+                        class="
+                            absolute
+                            top-3
+                            right-3
+                            z-20
+                            bg-black/80
+                            px-3
+                            py-1
+                            rounded-md
+                            border
+                            border-gray-800
+                            text-[10px]
+                            cyber-font
+                            font-bold
+                            tracking-widest
+                            text-cyan-400
+                        "
+                        x-text="game.platform"
+                    ></div>
+
+                    <!-- IMAGE -->
+                    <div
+                        class="
+                            relative
+                            h-52
+                            w-full
+                            overflow-hidden
+                            bg-slate-900
+                        "
+                    >
+
+                        <img
+                            :src="
+                                game.decrypted
+                                ? game.real_cover
+                                : game.obfuscated_cover
+                            "
+                            :alt="game.real_name"
+                            class="
+                                w-full
+                                h-full
+                                object-cover
+                                transition-all
+                                duration-700
+                            "
+                            :class="
+                                game.decrypted
+                                ? 'scale-100'
+                                : 'scale-110 brightness-75 contrast-125 group-hover:scale-100'
+                            "
+                            @error="$event.target.src = fallbackImage"
+                        >
+
+                        <div
+                            class="
+                                absolute
+                                inset-0
+                                bg-gradient-to-t
+                                from-gray-950
+                                via-transparent
+                                to-black/30
+                            "
+                        ></div>
+
+                        <!-- SCAN -->
+                        <div
+                            x-show="game.downloading"
+                            class="scan-effect"
+                        ></div>
+
+                        <!-- ENCRYPTED LABEL -->
+                        <div
+                            x-show="!game.decrypted"
+                            class="
+                                absolute
+                                bottom-2
+                                left-3
+                                bg-cyan-950/80
+                                border
+                                border-cyan-400/50
+                                text-cyan-300
+                                px-2
+                                py-0.5
+                                rounded
+                                text-[9px]
+                                cyber-font
+                                animate-pulse-fast
+                            "
+                        >
+                            ENCRYPTED IDENTITY
+                        </div>
+
+                    </div>
+
+                    <!-- CONTENT -->
+                    <div
+                        class="
+                            p-5
+                            flex-grow
+                            flex
+                            flex-col
+                            justify-between
+                        "
+                    >
+
+                        <div>
+
+                            <h3
+                                class="
+                                    text-xl
+                                    font-bold
+                                    tracking-wide
+                                    mb-2
+                                "
+                                :class="
+                                    game.decrypted
+                                    ? 'text-pink-400'
+                                    : 'text-gray-200 group-hover:text-cyan-300'
+                                "
+                                x-text="
+                                    game.decrypted
+                                    ? game.real_name
+                                    : game.obfuscated_name
+                                "
+                            ></h3>
+
+                            <p
+                                class="
+                                    text-sm
+                                    text-gray-400
+                                    mb-4
+                                    min-h-[40px]
+                                "
+                                x-text="
+                                    game.decrypted
+                                    ? game.real_desc
+                                    : game.obfuscated_desc
+                                "
+                            ></p>
+
+                        </div>
+
+                        <!-- FOOTER -->
+                        <div
+                            class="
+                                border-t
+                                border-gray-900
+                                pt-4
+                                mt-2
+                            "
+                        >
+
+                            <div
+                                class="
+                                    flex
+                                    justify-between
+                                    items-center
+                                    text-xs
+                                    mb-4
+                                "
+                            >
+
+                                <span class="text-gray-500 cyber-font">
+                                    SCAN STATUS:
+                                </span>
+
+                                <span
+                                    :class="
+                                        game.sandbox_status === 'CLEAN'
+                                        ? 'text-emerald-400'
+                                        : 'text-yellow-400'
+                                    "
+                                    class="
+                                        font-bold
+                                        cyber-font
+                                        tracking-wide
+                                    "
+                                >
+                                    ●
+                                    <span
+                                        x-text="game.sandbox_status"
+                                    ></span>
+                                </span>
+
+                            </div>
+
+                            <!-- ACTION -->
+                            <button
+                                @click="executeDecryptionMatrix(game)"
+                                :disabled="game.downloading"
+                                class="
+                                    w-full
+                                    py-3
+                                    px-4
+                                    rounded-xl
+                                    font-bold
+                                    text-xs
+                                    tracking-widest
+                                    cyber-font
+                                    uppercase
+                                    transition-all
+                                    duration-300
+                                    active:scale-95
+                                    flex
+                                    justify-center
+                                    items-center
+                                    gap-2
+                                    disabled:opacity-50
+                                    disabled:cursor-not-allowed
+                                "
+                                :class="
+                                    game.decrypted
+                                    ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white neon-glow-magenta'
+                                    : 'bg-black hover:bg-cyan-950 text-cyan-400 border border-cyan-500/50 hover:border-cyan-400 hover:text-white'
+                                "
+                            >
+
+                                <span
+                                    x-show="!game.downloading && !game.decrypted"
+                                >
+                                    ⚡ DECRYPT IDENTITY
+                                </span>
+
+                                <span
+                                    x-show="!game.downloading && game.decrypted"
+                                >
+                                    OPEN GAME INFO
+                                </span>
+
+                                <span
+                                    x-show="game.downloading"
+                                >
+                                    <span x-text="game.status_text"></span>
+                                </span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </template>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer
+            class="
+                mt-16
+                pt-8
+                pb-8
+                border-t
+                border-cyan-500/10
+                text-center
+                text-gray-600
+                text-xs
+                cyber-font
+            "
+        >
+
+            <p>
+                NEXUS.CORE // GLOBAL GAME INFORMATION MATRIX
+            </p>
+
+            <p class="mt-2 text-gray-700">
+                SYSTEM STATUS: OPERATIONAL
+            </p>
+
+        </footer>
+
+    </div>
+
+    <!-- INFO MODAL -->
+    <div
+        x-show="selectedGame !== null"
+        x-transition.opacity
+        class="
+            fixed
+            inset-0
+            z-[1000]
+            flex
+            items-center
+            justify-center
+            p-4
+            bg-black/80
+            modal-backdrop
+        "
+        @click.self="selectedGame = null"
+        style="display: none;"
+    >
+
+        <div
+            x-show="selectedGame !== null"
+            x-transition.scale
+            class="
+                w-full
+                max-w-lg
+                bg-gray-950
+                border
+                border-cyan-500/40
+                rounded-2xl
+                shadow-[0_0_40px_rgba(6,182,212,0.25)]
+                overflow-hidden
+            "
+        >
+
+            <template x-if="selectedGame">
+
+                <div>
+
+                    <div class="relative h-48">
+
+                        <img
+                            :src="selectedGame.real_cover"
+                            :alt="selectedGame.real_name"
+                            class="w-full h-full object-cover"
+                            @error="$event.target.src = fallbackImage"
+                        >
+
+                        <div
+                            class="
+                                absolute
+                                inset-0
+                                bg-gradient-to-t
+                                from-gray-950
+                                to-transparent
+                            "
+                        ></div>
+
+                    </div>
+
+                    <div class="p-6">
+
+                        <div
+                            class="
+                                text-xs
+                                text-cyan-400
+                                cyber-font
+                                mb-2
+                            "
+                            x-text="selectedGame.platform"
+                        ></div>
+
+                        <h2
+                            class="
+                                text-2xl
+                                font-bold
+                                cyber-font
+                                text-pink-400
+                                mb-4
+                            "
+                            x-text="selectedGame.real_name"
+                        ></h2>
+
+                        <p
+                            class="text-gray-400 leading-7"
+                            x-text="selectedGame.real_desc"
+                        ></p>
+
+                        <div
+                            class="
+                                mt-5
+                                p-4
+                                rounded-lg
+                                border
+                                border-cyan-500/20
+                                bg-cyan-950/20
+                                text-sm
+                                text-gray-400
+                            "
+                        >
+                            ระบบนี้เป็นหน้าข้อมูลเกมสำหรับแสดงรายละเอียด
+                            และสถานะของเกม ไม่มีการติดตั้งหรือแจกไฟล์ดัดแปลง
+                        </div>
+
+                        <button
+                            @click="selectedGame = null"
+                            class="
+                                mt-6
+                                w-full
+                                py-3
+                                rounded-xl
+                                bg-cyan-500
+                                text-black
+                                font-bold
+                                cyber-font
+                                hover:bg-cyan-400
+                                transition
+                            "
+                        >
+                            CLOSE MATRIX
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </template>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        function cyberSystem() {
+
+            return {
+
+                searchQuery: '',
+
+                activePlatform: 'ALL',
+
+                selectedGame: null,
+
+                platforms: [
+                    'ALL',
+                    'ANDROID',
+                    'PC',
+                    'IOS'
+                ],
+
+                fallbackImage:
+                    'https://placehold.co/1200x700/030712/22d3ee?text=NEXUS.CORE',
+
+                games: [
+
+                    {
+                        id: 1,
+
+                        platform: 'ANDROID',
+
+                        obfuscated_name:
+                            'CRIME AUTOMATION V',
+
+                        obfuscated_desc:
+                            'เกมขับรถในเมืองใหญ่แบบ Open World',
+
+                        obfuscated_cover:
+                            'https://placehold.co/1200x700/111827/22d3ee?text=ENCRYPTED+ANDROID',
+
+                        real_name:
+                            'Grand Theft Auto V',
+
+                        real_desc:
+                            'ข้อมูลเกม Open World พร้อมรายละเอียดแพลตฟอร์มและสถานะระบบ',
+
+                        real_cover:
+                            'https://placehold.co/1200x700/111827/ec4899?text=GTA+V',
+
+                        sandbox_status:
+                            'CLEAN',
+
+                        sandbox_score:
+                            'VERIFIED',
+
+                        decrypted:
+                            false,
+
+                        downloading:
+                            false,
+
+                        status_text:
+                            ''
+
+                    },
+
+                    {
+                        id: 2,
+
+                        platform: 'PC',
+
+                        obfuscated_name:
+                            'BLOCK BUILDER & CRAFTING',
+
+                        obfuscated_desc:
+                            'เกม Sandbox สำหรับสร้างและสำรวจโลกแบบบล็อก',
+
+                        obfuscated_cover:
+                            'https://placehold.co/1200x700/111827/22d3ee?text=ENCRYPTED+PC',
+
+                        real_name:
+                            'Minecraft',
+
+                        real_desc:
+                            'ข้อมูลเกม Sandbox และรายละเอียดระบบสำหรับแพลตฟอร์ม PC',
+
+                        real_cover:
+                            'https://placehold.co/1200x700/111827/84cc16?text=MINECRAFT',
+
+                        sandbox_status:
+                            'CLEAN',
+
+                        sandbox_score:
+                            'VERIFIED',
+
+                        decrypted:
+                            false,
+
+                        downloading:
+                            false,
+
+                        status_text:
+                            ''
+
+                    },
+
+                    {
+                        id: 3,
+
+                        platform: 'IOS',
+
+                        obfuscated_name:
+                            'FANTASY ANIME OPENWORLD RPG',
+
+                        obfuscated_desc:
+                            'เกม RPG Open World สไตล์อนิเมะ',
+
+                        obfuscated_cover:
+                            'https://placehold.co/1200x700/111827/22d3ee?text=ENCRYPTED+IOS',
+
+                        real_name:
+                            'Genshin Impact',
+
+                        real_desc:
+                            'ข้อมูลเกม RPG Open World และรายละเอียดแพลตฟอร์ม iOS',
+
+                        real_cover:
+                            'https://placehold.co/1200x700/111827/a855f7?text=GENSHIN+IMPACT',
+
+                        sandbox_status:
+                            'CLEAN',
+
+                        sandbox_score:
+                            'VERIFIED',
+
+                        decrypted:
+                            false,
+
+                        downloading:
+                            false,
+
+                        status_text:
+                            ''
+
+                    },
+
+                    {
+                        id: 4,
+
+                        platform: 'ANDROID',
+
+                        obfuscated_name:
+                            'TACTICAL SURVIVAL BATTLEGROUNDS',
+
+                        obfuscated_desc:
+                            'เกม Battle Royale เอาชีวิตรอดบนเกาะ',
+
+                        obfuscated_cover:
+                            'https://placehold.co/1200x700/111827/22d3ee?text=ENCRYPTED+ANDROID',
+
+                        real_name:
+                            'PUBG Mobile',
+
+                        real_desc:
+                            'ข้อมูลเกม Battle Royale และรายละเอียดแพลตฟอร์ม Android',
+
+                        real_cover:
+                            'https://placehold.co/1200x700/111827/f59e0b?text=PUBG+MOBILE',
+
+                        sandbox_status:
+                            'WARNING',
+
+                        sandbox_score:
+                            'REVIEW',
+
+                        decrypted:
+                            false,
+
+                        downloading:
+                            false,
+
+                        status_text:
+                            ''
+
+                    },
+
+                    {
+                        id: 5,
+
+                        platform: 'PC',
+
+                        obfuscated_name:
+                            'GALACTIC SPACE COMBAT',
+
+                        obfuscated_desc:
+                            'เกมสำรวจอวกาศและต่อสู้ในจักรวาลขนาดใหญ่',
+
+                        obfuscated_cover:
+                            'https://placehold.co/1200x700/111827/22d3ee?text=ENCRYPTED+PC',
+
+                        real_name:
+                            'Space Explorer',
+
+                        real_desc:
+                            'เกมแนวสำรวจอวกาศสำหรับผู้เล่น PC',
+
+                        real_cover:
+                            'https://placehold.co/1200x700/111827/06b6d4?text=SPACE+EXPLORER',
+
+                        sandbox_status:
+                            'CLEAN',
+
+                        sandbox_score:
+                            'VERIFIED',
+
+                        decrypted:
+                            false,
+
+                        downloading:
+                            false,
+
+                        status_text:
+                            ''
+
+                    },
+
+                    {
+                        id: 6,
+
+                        platform: 'IOS',
+
+                        obfuscated_name:
+                            'RACING TURBO EXPERIENCE',
+
+                        obfuscated_desc:
+                            'เกมแข่งรถความเร็วสูงพร้อมรถหลายประเภท',
+
+                        obfuscated_cover:
+                            'https://placehold.co/1200x700/111827/22d3ee?text=ENCRYPTED+IOS',
+
+                        real_name:
+                            'Turbo Racing',
+
+                        real_desc:
+                            'เกมแข่งรถสำหรับอุปกรณ์ iOS',
+
+                        real_cover:
+                            'https://placehold.co/1200x700/111827/ef4444?text=TURBO+RACING',
+
+                        sandbox_status:
+                            'CLEAN',
+
+                        sandbox_score:
+                            'VERIFIED',
+
+                        decrypted:
+                            false,
+
+                        downloading:
+                            false,
+
+                        status_text:
+                            ''
+
+                    }
+
+                ],
+
+                get filteredGames() {
+
+                    const query =
+                        this.searchQuery
+                            .trim()
+                            .toLowerCase();
+
+                    return this.games.filter(game => {
+
+                        const searchText = [
+
+                            game.obfuscated_name,
+
+                            game.obfuscated_desc,
+
+                            game.real_name,
+
+                            game.real_desc,
+
+                            game.platform
+
+                        ]
+                        .join(' ')
+                        .toLowerCase();
+
+                        const matchSearch =
+                            query === '' ||
+                            searchText.includes(query);
+
+                        const matchPlatform =
+                            this.activePlatform === 'ALL' ||
+                            game.platform === this.activePlatform;
+
+                        return matchSearch && matchPlatform;
+
+                    });
+
+                },
+
+                executeDecryptionMatrix(game) {
+
+                    if (game.downloading) {
+                        return;
+                    }
+
+                    if (!game.decrypted) {
+
+                        game.downloading = true;
+
+                        game.status_text =
+                            'DECRYPTING...';
+
+                        setTimeout(() => {
+
+                            game.decrypted = true;
+
+                            game.downloading = false;
+
+                            game.status_text = '';
+
+                        }, 1200);
+
+                        return;
+                    }
+
+                    this.selectedGame = game;
+
+                }
+
+            };
+
+        }
+    </script>
+
+</body>
+</html>
