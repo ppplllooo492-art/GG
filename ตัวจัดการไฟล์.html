@@ -1,0 +1,865 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#202124">
+<title>NEXUS ZA-STYLE</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<style>
+:root{
+ --bg:#202124;
+ --panel:#292a2d;
+ --panel2:#303134;
+ --line:#414247;
+ --text:#f1f3f4;
+ --muted:#aeb3bb;
+ --blue:#8ab4f8;
+ --orange:#ffb74d;
+ --green:#81c995;
+ --red:#f28b82;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Roboto,"Noto Sans Thai",Arial,sans-serif;
+ font-size:14px;
+}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.topbar{
+ height:58px;background:#292a2d;
+ display:flex;align-items:center;gap:13px;
+ padding:0 14px;border-bottom:1px solid var(--line);
+ position:sticky;top:0;z-index:5;
+}
+.logo{
+ width:34px;height:34px;border-radius:9px;
+ background:linear-gradient(135deg,#00bcd4,#536dfe);
+ display:grid;place-items:center;font-weight:900;
+ font-size:20px;
+}
+.brand{font-size:17px;font-weight:700}
+.brand small{display:block;font-size:10px;color:var(--muted);font-weight:400}
+.top-actions{margin-left:auto;display:flex;gap:5px}
+.icon-btn{
+ border:0;background:transparent;color:var(--text);
+ width:40px;height:40px;border-radius:50%;font-size:19px;
+}
+.icon-btn:active,.toolbar button:active{background:#45464b}
+.pathbar{
+ display:flex;align-items:center;gap:8px;
+ padding:12px 13px;background:#242528;
+ border-bottom:1px solid var(--line);
+ overflow-x:auto;white-space:nowrap;
+}
+.pathbar button{
+ border:0;background:transparent;color:var(--blue);
+ padding:4px;font-size:13px;
+}
+.pathbar span{color:var(--muted)}
+.toolbar{
+ display:flex;gap:4px;padding:7px 9px;
+ background:var(--panel);overflow-x:auto;
+ border-bottom:1px solid var(--line);
+}
+.toolbar button{
+ background:transparent;border:0;color:var(--text);
+ padding:9px 11px;border-radius:7px;white-space:nowrap;
+ font-size:12px;
+}
+.toolbar button span{margin-right:5px}
+.searchbar{
+ display:flex;gap:8px;padding:10px 12px;
+ background:var(--bg);
+}
+.searchbar input{
+ width:100%;background:#303134;border:1px solid #45464b;
+ border-radius:9px;color:white;padding:11px 13px;outline:none;
+}
+.searchbar select{
+ background:#303134;border:1px solid #45464b;
+ color:white;border-radius:9px;padding:0 8px;
+}
+.info{
+ padding:8px 13px;color:var(--muted);font-size:11px;
+ display:flex;justify-content:space-between;
+}
+.file-list{padding-bottom:80px}
+.file{
+ min-height:60px;display:flex;align-items:center;
+ padding:8px 13px;gap:13px;border-bottom:1px solid #343539;
+}
+.file:active{background:#35363a}
+.file.selected{background:#34445a}
+.file-icon{
+ width:39px;height:39px;display:grid;place-items:center;
+ font-size:27px;flex-shrink:0;
+}
+.file-info{min-width:0;flex:1}
+.file-name{
+ font-size:14px;white-space:nowrap;overflow:hidden;
+ text-overflow:ellipsis;
+}
+.file-sub{font-size:11px;color:var(--muted);margin-top:5px}
+.file-size{font-size:11px;color:var(--muted);white-space:nowrap}
+.file-menu{
+ border:0;background:transparent;color:var(--muted);
+ font-size:20px;padding:8px;
+}
+.empty{
+ text-align:center;color:var(--muted);padding:70px 15px;
+}
+.empty div{font-size:42px;margin-bottom:15px}
+.bottom{
+ position:fixed;bottom:0;left:0;right:0;
+ background:#292a2d;border-top:1px solid var(--line);
+ display:flex;justify-content:space-around;padding:9px 5px;
+ z-index:5;
+}
+.bottom button{
+ border:0;background:transparent;color:var(--muted);
+ font-size:11px;display:grid;gap:5px;justify-items:center;
+}
+.bottom button b{font-size:19px}
+.bottom button.active{color:var(--blue)}
+.modal{
+ display:none;position:fixed;inset:0;background:#0009;
+ z-index:20;align-items:center;justify-content:center;padding:15px;
+}
+.modal.show{display:flex}
+.dialog{
+ width:100%;max-width:440px;background:#303134;
+ border:1px solid #505158;border-radius:14px;
+ padding:17px;max-height:85vh;overflow:auto;
+}
+.dialog h3{margin:0 0 16px;font-size:17px}
+.dialog input,.dialog textarea,.dialog select{
+ width:100%;padding:12px;background:#202124;
+ color:white;border:1px solid #555;border-radius:8px;
+ margin:6px 0 12px;outline:none;
+}
+.dialog textarea{min-height:200px;resize:vertical}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.action{
+ background:#41434a;color:white;border:0;
+ border-radius:8px;padding:10px 14px;
+}
+.action.primary{background:#8ab4f8;color:#202124;font-weight:700}
+.action.danger{background:#a83c3c}
+.menu-option{
+ width:100%;padding:14px;background:transparent;
+ border:0;border-bottom:1px solid #45464b;
+ color:white;text-align:left;
+}
+.menu-option:active{background:#45464b}
+.toast{
+ position:fixed;bottom:75px;left:50%;transform:translateX(-50%);
+ background:#e8eaed;color:#202124;padding:12px 18px;
+ border-radius:8px;z-index:40;display:none;
+ max-width:90%;font-size:12px;
+}
+.status{
+ color:var(--green);font-size:11px;
+}
+@media(min-width:700px){
+ body{max-width:900px;margin:auto;border-left:1px solid #414247;border-right:1px solid #414247;min-height:100vh}
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+ <div class="logo">N</div>
+ <div class="brand">NEXUS
+  <small>FILE MANAGER</small>
+ </div>
+ <div class="top-actions">
+  <button class="icon-btn" onclick="openSearch()" title="ค้นหา">⌕</button>
+  <button class="icon-btn" onclick="showSettings()" title="ตั้งค่า">⚙</button>
+  <button class="icon-btn" onclick="showMore()" title="เพิ่มเติม">⋮</button>
+ </div>
+</header>
+
+<div class="pathbar" id="breadcrumbs">
+ <button onclick="goRoot()">📁 หน้าหลัก</button>
+</div>
+
+<div class="toolbar">
+ <button onclick="pickFolder()"><span>📂</span>เปิดโฟลเดอร์</button>
+ <button onclick="createFolder()"><span>📁</span>โฟลเดอร์ใหม่</button>
+ <button onclick="createFile()"><span>📄</span>ไฟล์ใหม่</button>
+ <button onclick="makeArchive()"><span>📦</span>บีบอัด</button>
+ <button onclick="openArchive()"><span>🗜️</span>เปิด ZIP</button>
+</div>
+
+<div class="searchbar">
+ <input id="search" placeholder="ค้นหาไฟล์ในโฟลเดอร์..." oninput="render()">
+ <select id="sort" onchange="render()">
+  <option value="name">ชื่อ</option>
+  <option value="size">ขนาด</option>
+  <option value="date">วันที่</option>
+ </select>
+</div>
+
+<div class="info">
+ <span id="folderName">ยังไม่ได้เลือกโฟลเดอร์</span>
+ <span id="fileCount">0 รายการ</span>
+</div>
+
+<main class="file-list" id="fileList">
+ <div class="empty">
+  <div>📂</div>
+  <b>NEXUS File Manager</b>
+  <p>เลือกโฟลเดอร์เพื่อเริ่มจัดการไฟล์</p>
+  <button class="action primary" onclick="pickFolder()">เลือกโฟลเดอร์</button>
+ </div>
+</main>
+
+<nav class="bottom">
+ <button class="active" onclick="goRoot()"><b>⌂</b>หน้าหลัก</button>
+ <button onclick="pickFolder()"><b>📂</b>โฟลเดอร์</button>
+ <button onclick="makeArchive()"><b>📦</b>บีบอัด</button>
+ <button onclick="showSelectionMenu()"><b>☑</b>เลือกไฟล์</button>
+ <button onclick="showSettings()"><b>⚙</b>ตั้งค่า</button>
+</nav>
+
+<div class="modal" id="modal">
+ <div class="dialog">
+  <h3 id="modalTitle">NEXUS</h3>
+  <div id="modalBody"></div>
+  <div class="dialog-actions" id="modalActions"></div>
+ </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fallbackFiles" multiple hidden>
+<input type="file" id="zipInput" accept=".zip" hidden>
+
+<script>
+/* ==========================================
+   NEXUS ZA-STYLE FILE MANAGER
+   ========================================== */
+
+const $=id=>document.getElementById(id);
+
+let rootHandle=null;
+let currentHandle=null;
+let pathHandles=[];
+let currentFiles=[];
+let selected=new Set();
+let clipboard=[];
+let clipboardMode='copy';
+let zipEntries=null;
+let fallbackMode=false;
+
+function toast(message){
+ const el=$('toast');
+ el.textContent=message;
+ el.style.display='block';
+ clearTimeout(window.toastTimer);
+ window.toastTimer=setTimeout(()=>el.style.display='none',2600);
+}
+
+function formatSize(bytes){
+ if(bytes===undefined||bytes===null)return'—';
+ if(bytes===0)return'0 B';
+ const units=['B','KB','MB','GB','TB'];
+ const i=Math.floor(Math.log(bytes)/Math.log(1024));
+ return(bytes/Math.pow(1024,i)).toFixed(i===0?0:2)+' '+units[i];
+}
+
+function formatDate(date){
+ if(!date)return'';
+ return new Date(date).toLocaleString();
+}
+
+function ext(name){
+ const p=name.lastIndexOf('.');
+ return p<0?'':name.substring(p+1).toLowerCase();
+}
+
+function iconFor(item){
+ if(item.kind==='directory')return'📁';
+ const e=ext(item.name);
+ if(['zip','rar','7z','tar','gz'].includes(e))return'📦';
+ if(['jpg','jpeg','png','gif','webp','bmp','svg'].includes(e))return'🖼️';
+ if(['mp4','mkv','avi','mov','webm'].includes(e))return'🎬';
+ if(['mp3','wav','ogg','m4a'].includes(e))return'🎵';
+ if(['pdf'].includes(e))return'📕';
+ if(['txt','md','log'].includes(e))return'📝';
+ if(['js','html','css','json','xml','lua','py'].includes(e))return'💻';
+ if(['apk'].includes(e))return'🤖';
+ return'📄';
+}
+
+function showModal(title,body,actions){
+ $('modalTitle').textContent=title;
+ $('modalBody').innerHTML=body;
+ $('modalActions').innerHTML='';
+ actions.forEach(a=>{
+  const b=document.createElement('button');
+  b.className='action '+(a.primary?'primary':'');
+  b.textContent=a.label;
+  b.onclick=a.fn;
+  $('modalActions').appendChild(b);
+ });
+ $('modal').classList.add('show');
+}
+
+function closeModal(){
+ $('modal').classList.remove('show');
+}
+
+async function checkPermission(handle,write=false){
+ if(!handle)return false;
+ try{
+  const mode=write?'readwrite':'read';
+  let p=await handle.queryPermission({mode});
+  if(p==='granted')return true;
+  p=await handle.requestPermission({mode});
+  return p==='granted';
+ }catch(e){return false;}
+}
+
+/* Open a real directory */
+async function pickFolder(){
+ if(!window.showDirectoryPicker){
+  fallbackMode=true;
+  toast('เบราว์เซอร์นี้ไม่รองรับการเปิดโฟลเดอร์โดยตรง');
+  $('fallbackFiles').click();
+  return;
+ }
+ try{
+  const handle=await window.showDirectoryPicker({mode:'readwrite'});
+  if(!await checkPermission(handle,true)){
+   toast('ไม่ได้รับอนุญาตให้เข้าถึงโฟลเดอร์');
+   return;
+  }
+  rootHandle=handle;
+  currentHandle=handle;
+  pathHandles=[handle];
+  selected.clear();
+  await loadDirectory();
+  toast('เปิดโฟลเดอร์สำเร็จ');
+ }catch(e){
+  if(e.name!=='AbortError')toast('เปิดโฟลเดอร์ไม่สำเร็จ');
+ }
+}
+
+$('fallbackFiles').addEventListener('change',e=>{
+ currentFiles=[];
+ [...e.target.files].forEach(file=>{
+  currentFiles.push({
+   name:file.name,kind:'file',size:file.size,
+   date:file.lastModified,file,handle:null
+  });
+ });
+ render();
+ toast('เพิ่มไฟล์ที่เลือกแล้ว');
+ e.target.value='';
+});
+
+/* Read current directory */
+async function loadDirectory(){
+ if(!currentHandle)return;
+ try{
+  if(!await checkPermission(currentHandle,false)){
+   toast('ไม่มีสิทธิ์อ่านโฟลเดอร์');
+   return;
+  }
+  currentFiles=[];
+  for await(const [name,handle] of currentHandle.entries()){
+   try{
+    if(handle.kind==='directory'){
+     currentFiles.push({
+      name,kind:'directory',size:0,handle,
+      date:0
+     });
+    }else{
+     const f=await handle.getFile();
+     currentFiles.push({
+      name,kind:'file',size:f.size,
+      date:f.lastModified,file:f,handle
+     });
+    }
+   }catch(e){}
+  }
+  selected.clear();
+  updateBreadcrumbs();
+  render();
+ }catch(e){
+  toast('อ่านรายการไฟล์ไม่สำเร็จ');
+ }
+}
+
+function updateBreadcrumbs(){
+ const bar=$('breadcrumbs');
+ bar.innerHTML='';
+ const root=document.createElement('button');
+ root.textContent='📁 '+(rootHandle?.name||'หน้าหลัก');
+ root.onclick=goRoot;
+ bar.appendChild(root);
+
+ for(let i=1;i<pathHandles.length;i++){
+  const sep=document.createElement('span');
+  sep.textContent='›';
+  bar.appendChild(sep);
+  const b=document.createElement('button');
+  b.textContent=pathHandles[i].name;
+  b.onclick=()=>goToIndex(i);
+  bar.appendChild(b);
+ }
+ $('folderName').textContent=currentHandle?.name||'ไฟล์ที่เลือก';
+}
+
+async function goRoot(){
+ if(!rootHandle){
+  toast('กรุณาเลือกโฟลเดอร์ก่อน');
+  return;
+ }
+ currentHandle=rootHandle;
+ pathHandles=[rootHandle];
+ await loadDirectory();
+}
+
+async function goToIndex(i){
+ currentHandle=pathHandles[i];
+ pathHandles=pathHandles.slice(0,i+1);
+ await loadDirectory();
+}
+
+async function enterFolder(item){
+ if(item.kind!=='directory')return;
+ currentHandle=item.handle;
+ pathHandles.push(item.handle);
+ await loadDirectory();
+}
+
+/* File list */
+function render(){
+ const list=$('fileList');
+ const q=$('search').value.trim().toLowerCase();
+ let data=currentFiles.filter(f=>f.name.toLowerCase().includes(q));
+
+ const sort=$('sort').value;
+ data.sort((a,b)=>{
+  if(a.kind!==b.kind)return a.kind==='directory'?-1:1;
+  if(sort==='size')return b.size-a.size;
+  if(sort==='date')return b.date-a.date;
+  return a.name.localeCompare(b.name);
+ });
+
+ $('fileCount').textContent=data.length+' รายการ';
+ list.innerHTML='';
+
+ if(!data.length){
+  list.innerHTML='<div class="empty"><div>📂</div><b>ไม่มีไฟล์ในโฟลเดอร์นี้</b></div>';
+  return;
+ }
+
+ data.forEach(item=>{
+  const row=document.createElement('div');
+  row.className='file'+(selected.has(item.name)?' selected':'');
+  const ico=document.createElement('div');
+  ico.className='file-icon';
+  ico.textContent=iconFor(item);
+
+  const info=document.createElement('div');
+  info.className='file-info';
+
+  const name=document.createElement('div');
+  name.className='file-name';
+  name.textContent=item.name;
+
+  const sub=document.createElement('div');
+  sub.className='file-sub';
+  sub.textContent=item.kind==='directory'?'โฟลเดอร์':formatDate(item.date);
+
+  info.append(name,sub);
+
+  const size=document.createElement('div');
+  size.className='file-size';
+  size.textContent=item.kind==='directory'?'':formatSize(item.size);
+
+  const menu=document.createElement('button');
+  menu.className='file-menu';
+  menu.textContent='⋮';
+  menu.onclick=e=>{
+   e.stopPropagation();
+   itemMenu(item);
+  };
+
+  row.append(ico,info,size,menu);
+
+  row.onclick=()=>{
+   if(item.kind==='directory'){
+    enterFolder(item);
+   }else{
+    openFile(item);
+   }
+  };
+
+  row.oncontextmenu=e=>{
+   e.preventDefault();
+   itemMenu(item);
+  };
+
+  list.appendChild(row);
+ });
+}
+
+/* File preview */
+async function openFile(item){
+ if(!item.file){
+  toast('ไม่สามารถเปิดไฟล์นี้ได้');
+  return;
+ }
+ const e=ext(item.name);
+ if(['zip'].includes(e)){
+  readZip(item.file);
+  return;
+ }
+ if(item.file.type.startsWith('image/')){
+  const url=URL.createObjectURL(item.file);
+  showModal('ตัวอย่างรูปภาพ',
+   '<img src="'+url+'" style="width:100%;border-radius:8px">',
+   [{label:'ปิด',fn:closeModal}]);
+  return;
+ }
+ if(item.file.type.startsWith('video/')){
+  const url=URL.createObjectURL(item.file);
+  showModal('ตัวอย่างวิดีโอ',
+   '<video src="'+url+'" controls style="width:100%"></video>',
+   [{label:'ปิด',fn:closeModal}]);
+  return;
+ }
+ if(item.size>2*1024*1024){
+  toast('ไฟล์ใหญ่เกินไปสำหรับตัวแสดงข้อความ');
+  return;
+ }
+ try{
+  const text=await item.file.text();
+  showModal(item.name,
+   '<textarea id="previewText" readonly></textarea>',
+   [{label:'ปิด',fn:closeModal}]);
+  $('previewText').value=text;
+ }catch(e){
+  toast('ไม่สามารถแสดงตัวอย่างได้');
+ }
+}
+
+/* Context menu */
+function itemMenu(item){
+ const opts=[
+  ['📄 เปิด',()=>{closeModal();item.kind==='directory'?enterFolder(item):openFile(item)}],
+  ['✏️ เปลี่ยนชื่อ',()=>renameItem(item)],
+  ['📋 คัดลอก',()=>{clipboard=[item];clipboardMode='copy';closeModal();toast('คัดลอกแล้ว เลือกวางในโฟลเดอร์ปลายทาง')}],
+  ['✂️ ย้าย',()=>{clipboard=[item];clipboardMode='move';closeModal();toast('เลือกโฟลเดอร์ปลายทางแล้วกดวาง')}],
+  ['🗑️ ลบ',()=>deleteItem(item)],
+  ['ℹ️ รายละเอียด',()=>details(item)]
+ ];
+ showModal('จัดการ '+item.name,
+  opts.map((o,i)=>'<button class="menu-option" onclick="runItemAction('+i+')">'+o[0]+'</button>').join(''),
+  [{label:'ปิด',fn:closeModal}]);
+ window.currentItemActions=opts;
+}
+
+function runItemAction(i){
+ const a=window.currentItemActions?.[i];
+ if(a)a[1]();
+}
+
+function details(item){
+ closeModal();
+ showModal('รายละเอียดไฟล์',
+  '<p><b>ชื่อ:</b> '+escapeHTML(item.name)+'</p>'+
+  '<p><b>ประเภท:</b> '+item.kind+'</p>'+
+  '<p><b>ขนาด:</b> '+formatSize(item.size)+'</p>'+
+  '<p><b>วันที่:</b> '+formatDate(item.date)+'</p>',
+  [{label:'ปิด',fn:closeModal}]);
+}
+
+function escapeHTML(s){
+ return String(s).replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
+}
+
+/* Create directory */
+async function createFolder(){
+ if(!currentHandle){
+  toast('กรุณาเปิดโฟลเดอร์ก่อน');
+  return;
+ }
+ showModal('สร้างโฟลเดอร์',
+  '<input id="newName" placeholder="ชื่อโฟลเดอร์">',
+  [{label:'ยกเลิก',fn:closeModal},{label:'สร้าง',primary:true,fn:async()=>{
+   const name=$('newName').value.trim();
+   if(!validName(name))return toast('ชื่อไม่ถูกต้อง');
+   try{
+    await currentHandle.getDirectoryHandle(name,{create:true});
+    closeModal();await loadDirectory();toast('สร้างโฟลเดอร์แล้ว');
+   }catch(e){toast('สร้างโฟลเดอร์ไม่สำเร็จ');}
+  }}]);
+}
+
+/* Create file */
+async function createFile(){
+ if(!currentHandle)return toast('กรุณาเปิดโฟลเดอร์ก่อน');
+ showModal('สร้างไฟล์',
+  '<input id="newName" placeholder="ชื่อไฟล์ เช่น note.txt">'+
+  '<textarea id="newContent" placeholder="เนื้อหาไฟล์"></textarea>',
+  [{label:'ยกเลิก',fn:closeModal},{label:'สร้าง',primary:true,fn:async()=>{
+   const name=$('newName').value.trim();
+   const content=$('newContent').value;
+   if(!validName(name))return toast('ชื่อไฟล์ไม่ถูกต้อง');
+   try{
+    const h=await currentHandle.getFileHandle(name,{create:true});
+    const w=await h.createWritable();
+    await w.write(content);
+    await w.close();
+    closeModal();await loadDirectory();toast('สร้างไฟล์แล้ว');
+   }catch(e){toast('สร้างไฟล์ไม่สำเร็จ');}
+  }}]);
+}
+
+function validName(name){
+ return !!name && !/[\/\\]/.test(name) && name!=='.' && name!=='..';
+}
+
+/* Rename */
+async function renameItem(item){
+ closeModal();
+ showModal('เปลี่ยนชื่อ',
+  '<input id="renameInput" value="'+escapeHTML(item.name)+'">',
+  [{label:'ยกเลิก',fn:closeModal},{label:'บันทึก',primary:true,fn:async()=>{
+   const newName=$('renameInput').value.trim();
+   if(!validName(newName))return toast('ชื่อไม่ถูกต้อง');
+   if(!item.handle)return toast('ไฟล์นี้ไม่มีสิทธิ์แก้ไขต้นฉบับ');
+   try{
+    const oldFile=await item.handle.getFile();
+    const newHandle=item.kind==='directory'
+     ?await currentHandle.getDirectoryHandle(newName,{create:true})
+     :await currentHandle.getFileHandle(newName,{create:true});
+    if(item.kind==='file'){
+     const w=await newHandle.createWritable();
+     await w.write(oldFile);
+     await w.close();
+    }
+    await currentHandle.removeEntry(item.name,{recursive:true});
+    closeModal();await loadDirectory();toast('เปลี่ยนชื่อแล้ว');
+   }catch(e){toast('เปลี่ยนชื่อไม่สำเร็จ');}
+  }}]);
+}
+
+/* Delete */
+async function deleteItem(item){
+ closeModal();
+ showModal('ยืนยันการลบ',
+  '<p>ต้องการลบ <b>'+escapeHTML(item.name)+'</b> หรือไม่?</p><p style="color:#f28b82">การลบจะกระทบไฟล์ต้นฉบับ</p>',
+  [{label:'ยกเลิก',fn:closeModal},{label:'ลบ',fn:async()=>{
+   try{
+    if(!item.handle)throw Error('No handle');
+    await currentHandle.removeEntry(item.name,{recursive:true});
+    closeModal();await loadDirectory();toast('ลบแล้ว');
+   }catch(e){toast('ไม่มีสิทธิ์ลบไฟล์นี้');}
+  }}]);
+}
+
+/* Multiple selection */
+function showSelectionMenu(){
+ if(!currentFiles.length)return toast('ไม่มีไฟล์');
+ showModal('เลือกไฟล์',
+  '<p>แตะรายการไฟล์เพื่อเลือกหลายรายการ</p>'+
+  '<button class="menu-option" onclick="selectAll()">เลือกทั้งหมด</button>'+
+  '<button class="menu-option" onclick="clearSelection()">ยกเลิกการเลือก</button>'+
+  '<button class="menu-option" onclick="copySelected()">คัดลอกที่เลือก</button>'+
+  '<button class="menu-option" onclick="pasteItems()">วางรายการ</button>'+
+  '<button class="menu-option" onclick="archiveSelected()">บีบอัดที่เลือก</button>',
+  [{label:'ปิด',fn:closeModal}]);
+}
+
+function selectAll(){
+ selected=new Set(currentFiles.map(f=>f.name));
+ closeModal();render();
+}
+
+function clearSelection(){
+ selected.clear();closeModal();render();
+}
+
+function copySelected(){
+ clipboard=currentFiles.filter(f=>selected.has(f.name));
+ clipboardMode='copy';
+ closeModal();toast('คัดลอก '+clipboard.length+' รายการ');
+}
+
+/* Copy / move selected entries */
+async function pasteItems(){
+ closeModal();
+ if(!currentHandle)return toast('กรุณาเปิดโฟลเดอร์');
+ if(!clipboard.length)return toast('ไม่มีรายการในคลิปบอร์ด');
+ try{
+  for(const item of clipboard){
+   if(item.kind==='file'){
+    const blob=item.file || await item.handle.getFile();
+    const h=await currentHandle.getFileHandle(item.name,{create:true});
+    const w=await h.createWritable();
+    await w.write(blob);
+    await w.close();
+   }else{
+    toast('การคัดลอกโฟลเดอร์ทั้งชุดยังไม่รองรับ');
+   }
+   if(clipboardMode==='move'&&item.handle){
+    await item.parent?.removeEntry(item.name);
+   }
+  }
+  clipboard=[];
+  await loadDirectory();
+  toast('ดำเนินการเสร็จแล้ว');
+ }catch(e){toast('คัดลอกหรือย้ายไม่สำเร็จ');}
+}
+
+/* ZIP creation */
+async function makeArchive(){
+ if(!window.JSZip)return toast('โหลดระบบ ZIP ไม่สำเร็จ');
+ if(!currentFiles.length)return toast('ไม่มีไฟล์');
+ showModal('สร้าง ZIP',
+  '<input id="zipName" value="NEXUS_Archive.zip">',
+  [{label:'ยกเลิก',fn:closeModal},{label:'สร้าง ZIP',primary:true,fn:async()=>{
+   const name=$('zipName').value.trim()||'archive.zip';
+   try{
+    const zip=new JSZip();
+    const entries=currentFiles.filter(f=>selected.size===0||selected.has(f.name));
+    for(const item of entries){
+     if(item.kind==='file'){
+      zip.file(item.name,item.file||await item.handle.getFile());
+     }
+    }
+    const blob=await zip.generateAsync({type:'blob'});
+    await saveBlob(blob,name);
+    closeModal();toast('สร้าง ZIP สำเร็จ');
+   }catch(e){toast('สร้าง ZIP ไม่สำเร็จ');}
+  }}]);
+}
+
+async function archiveSelected(){
+ closeModal();
+ if(!selected.size)return toast('ยังไม่ได้เลือกไฟล์');
+ makeArchive();
+}
+
+/* Save a generated file */
+async function saveBlob(blob,name){
+ if(currentHandle&&window.showSaveFilePicker){
+  try{
+   const h=await currentHandle.getFileHandle(name,{create:true});
+   const w=await h.createWritable();
+   await w.write(blob);
+   await w.close();
+   await loadDirectory();
+   return;
+  }catch(e){}
+ }
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;a.download=name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
+/* ZIP reading */
+function openArchive(){
+ $('zipInput').click();
+}
+
+$('zipInput').addEventListener('change',async e=>{
+ const file=e.target.files[0];
+ if(file)readZip(file);
+ e.target.value='';
+});
+
+async function readZip(file){
+ if(!window.JSZip)return toast('โหลดระบบ ZIP ไม่สำเร็จ');
+ try{
+  const zip=await JSZip.loadAsync(file);
+  zipEntries=zip;
+  const names=Object.keys(zip.files);
+  showModal('ZIP: '+file.name,
+   '<div style="max-height:50vh;overflow:auto">'+
+   names.map(n=>'<div style="padding:9px;border-bottom:1px solid #555">📄 '+escapeHTML(n)+'</div>').join('')+
+   '</div>',
+   [
+    {label:'ปิด',fn:closeModal},
+    {label:'แตกทั้งหมด',primary:true,fn:()=>extractZip(zip)}
+   ]);
+ }catch(e){toast('ไฟล์ ZIP ไม่ถูกต้อง');}
+}
+
+async function extractZip(zip){
+ if(!currentHandle){
+  toast('เลือกโฟลเดอร์ปลายทางก่อน');
+  closeModal();
+  return;
+ }
+ closeModal();
+ try{
+  const entries=Object.keys(zip.files);
+  for(const name of entries){
+   const entry=zip.files[name];
+   const parts=name.split('/').filter(Boolean);
+   if(!parts.length)continue;
+   let dir=currentHandle;
+   for(let i=0;i<parts.length-(entry.dir?0:1);i++){
+    dir=await dir.getDirectoryHandle(parts[i],{create:true});
+   }
+   if(!entry.dir){
+    const data=await entry.async('blob');
+    const h=await dir.getFileHandle(parts[parts.length-1],{create:true});
+    const w=await h.createWritable();
+    await w.write(data);
+    await w.close();
+   }
+  }
+  await loadDirectory();
+  toast('แตกไฟล์ ZIP สำเร็จ');
+ }catch(e){toast('แตก ZIP ไม่สำเร็จ ตรวจสอบสิทธิ์และพื้นที่ว่าง');}
+}
+
+/* Search */
+function openSearch(){
+ $('search').focus();
+}
+
+/* More menu */
+function showMore(){
+ showModal('เมนูเพิ่มเติม',
+  '<button class="menu-option" onclick="goRoot()">⌂ กลับหน้าหลัก</button>'+
+  '<button class="menu-option" onclick="pickFolder()">📂 เปิดโฟลเดอร์</button>'+
+  '<button class="menu-option" onclick="showSelectionMenu()">☑ เลือกหลายไฟล์</button>'+
+  '<button class="menu-option" onclick="makeArchive()">📦 สร้าง ZIP</button>'+
+  '<button class="menu-option" onclick="openArchive()">🗜️ เปิด ZIP</button>',
+  [{label:'ปิด',fn:closeModal}]);
+}
+
+function showSettings(){
+ showModal('ตั้งค่า NEXUS',
+  '<p>เวอร์ชัน: 3.0</p>'+
+  '<p>รูปแบบ: ZA-style File Manager</p>'+
+  '<p>ระบบเข้าถึงไฟล์: File System Access API</p>'+
+  '<p style="color:#ffb74d">การเข้าถึงไฟล์ขึ้นอยู่กับสิทธิ์ของเบราว์เซอร์และ Android</p>'+
+  '<button class="menu-option" onclick="document.body.style.fontSize=\'16px\'">เพิ่มขนาดตัวอักษร</button>'+
+  '<button class="menu-option" onclick="document.body.style.fontSize=\'14px\'">ขนาดตัวอักษรปกติ</button>',
+  [{label:'ปิด',fn:closeModal}]);
+}
+
+/* Init */
+render();
+</script>
+</body>
+</html>
