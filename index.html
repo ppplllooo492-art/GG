@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Global Realtime Mod Hub v3.0</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #070a13 0%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+
+    .glass-effect {
+      background: rgba(255,255,255,.025);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .glow-card {
+      transition: all .3s ease;
+    }
+
+    .glow-card:hover {
+      box-shadow: 0 0 30px rgba(6,182,212,.2);
+      transform: translateY(-4px);
+    }
+
+    .hidden-section {
+      display: none !important;
+    }
+
+    input, textarea {
+      color-scheme: dark;
+    }
+
+    .loader {
+      width: 44px;
+      height: 44px;
+      border: 4px solid #164e63;
+      border-top-color: #22d3ee;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center p-4 md:p-8">
+
+  <!-- Loading -->
+  <div id="loadingOverlay"
+    class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4">
+    <div class="loader"></div>
+    <p class="text-sm text-cyan-400">
+      กำลังเชื่อมต่อฐานข้อมูล...
+    </p>
+  </div>
+
+  <!-- AUTH SCREEN -->
+  <div id="authScreen"
+    class="w-full max-w-md glass-effect p-8 rounded-3xl shadow-2xl relative overflow-hidden hidden-section">
+
+    <div class="absolute -top-10 -left-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
+
+    <!-- LOGIN -->
+    <div id="loginBox">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+          GLOBAL LOGIN
+        </h2>
+        <p class="text-xs text-gray-400 mt-2">
+          เข้าสู่ระบบ Global Realtime Hub
+        </p>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">
+            ชื่อผู้ใช้งาน
+          </label>
+          <input id="loginUser" type="text" required
+            autocomplete="username"
+            class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">
+            รหัสผ่าน
+          </label>
+          <input id="loginPass" type="password" required
+            autocomplete="current-password"
+            class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+        </div>
+
+        <button type="submit"
+          class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 py-3 rounded-xl text-sm font-medium shadow-lg">
+          <i class="fa-solid fa-right-to-bracket mr-2"></i>
+          เข้าสู่ระบบ
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-400 mt-6">
+        ยังไม่มีบัญชี?
+        <a href="#" id="showRegister"
+          class="text-cyan-400 hover:underline">
+          สมัครสมาชิก
+        </a>
+      </p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerBox" class="hidden-section">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          CREATE ACCOUNT
+        </h2>
+        <p class="text-xs text-gray-400 mt-2">
+          สมัครสมาชิกเพื่อใช้งานระบบ
+        </p>
+      </div>
+
+      <form id="regForm" class="space-y-4">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">
+            ตั้งชื่อผู้ใช้งาน
+          </label>
+          <input id="regUser" type="text" required
+            minlength="3" maxlength="20"
+            pattern="[A-Za-z0-9_]+"
+            autocomplete="username"
+            placeholder="ภาษาอังกฤษ ตัวเลข หรือ _"
+            class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500">
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">
+            ตั้งรหัสผ่าน
+          </label>
+          <input id="regPass" type="password" required
+            minlength="6"
+            autocomplete="new-password"
+            placeholder="อย่างน้อย 6 ตัวอักษร"
+            class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500">
+        </div>
+
+        <button type="submit"
+          class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 py-3 rounded-xl text-sm font-medium">
+          <i class="fa-solid fa-user-plus mr-2"></i>
+          สมัครสมาชิก
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-400 mt-6">
+        มีบัญชีแล้ว?
+        <a href="#" id="showLogin"
+          class="text-purple-400 hover:underline">
+          เข้าสู่ระบบ
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD -->
+  <main id="mainDashboard"
+    class="w-full max-w-7xl mx-auto hidden-section">
+
+    <!-- TOP BAR -->
+    <div class="flex justify-between items-center mb-6 glass-effect p-4 rounded-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-cyan-500/10 rounded-full border border-cyan-400/30 flex items-center justify-center text-cyan-400">
+          <i class="fa-solid fa-earth-asia animate-pulse"></i>
+        </div>
+
+        <div>
+          <div class="text-xs text-gray-400">ผู้ใช้งานออนไลน์</div>
+          <div id="userDisplay" class="text-sm font-semibold">
+            Guest
+          </div>
+        </div>
+      </div>
+
+      <button id="logoutBtn"
+        class="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs px-4 py-2 rounded-xl border border-red-500/20">
+        ออกจากระบบ
+        <i class="fa-solid fa-power-off ml-1"></i>
+      </button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="text-center my-8">
+      <h1 class="text-3xl md:text-5xl font-bold bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 bg-clip-text text-transparent mb-3">
+        <i class="fa-solid fa-network-wired mr-2"></i>
+        GLOBAL REALTIME HUB
+      </h1>
+
+      <p class="text-gray-400 text-xs md:text-sm">
+        แชร์ข้อมูล Mod และอัปเดตฟีดแบบเรียลไทม์
+      </p>
+    </header>
+
+    <!-- STATUS -->
+    <div class="glass-effect rounded-2xl p-4 mb-8 flex items-center justify-between">
+      <div>
+        <p class="text-xs text-gray-400">Live Database</p>
+        <p class="text-sm text-cyan-400">
+          <i class="fa-solid fa-circle text-[8px] mr-1"></i>
+          ระบบฟีดออนไลน์
+        </p>
+      </div>
+
+      <div class="text-right">
+        <div id="modCount" class="text-2xl font-bold text-cyan-400">
+          0
+        </div>
+        <div class="text-xs text-gray-400">รายการ</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- UPLOAD FORM -->
+      <section class="lg:col-span-1">
+        <div class="glass-effect p-6 rounded-2xl shadow-2xl lg:sticky lg:top-6">
+
+          <h2 class="text-lg font-semibold mb-5 flex items-center gap-2 text-cyan-400 border-b border-gray-800 pb-3">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            ส่งไฟล์เข้าสู่ระบบ
+          </h2>
+
+          <form id="modForm" class="space-y-4">
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">
+                ชื่อ Mod / Application
+              </label>
+              <input id="modName" type="text" required maxlength="100"
+                placeholder="ชื่อ Mod"
+                class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">
+                  เกม / ประเภท
+                </label>
+                <input id="modMonster" type="text" required maxlength="60"
+                  placeholder="เกม"
+                  class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs">
+              </div>
+
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">
+                  Version
+                </label>
+                <input id="modVersion" type="text" required maxlength="30"
+                  placeholder="v1.0"
+                  class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">
+                รูปภาพประกอบ
+              </label>
+
+              <input id="modImgFile" type="file" accept="image/*"
+                class="w-full text-xs text-gray-400 bg-slate-900/40 p-2 rounded-lg border border-gray-700">
+
+              <input id="modImgUrl" type="url"
+                placeholder="หรือวางลิงก์รูปภาพ"
+                class="w-full mt-2 bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs">
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">
+                ลิงก์ดาวน์โหลด APK
+              </label>
+              <input id="modLink" type="url" required
+                placeholder="https://..."
+                class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs">
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-400 mb-1">
+                คำอธิบาย / สรรพคุณ
+              </label>
+              <textarea id="modDesc" rows="4" maxlength="1000"
+                placeholder="รายละเอียดของ Mod..."
+                class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs resize-y"></textarea>
+            </div>
+
+            <button id="uploadBtn" type="submit"
+              class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 py-3 rounded-xl text-sm font-semibold">
+              <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+              อัปโหลดขึ้นคลาวด์
+            </button>
+
+            <p id="uploadStatus" class="text-xs text-gray-400 text-center"></p>
+          </form>
+        </div>
+      </section>
+
+      <!-- LIVE FEED -->
+      <section class="lg:col-span-2">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-semibold text-cyan-400">
+            <i class="fa-solid fa-satellite-dish mr-2"></i>
+            ฟีดอัปเดตสดจากทั่วโลก
+          </h2>
+
+          <span class="text-xs text-gray-500">LIVE</span>
+        </div>
+
+        <div id="modContainer"
+          class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="glass-effect p-10 rounded-2xl text-center text-gray-500">
+            กำลังโหลดข้อมูล...
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FIREBASE -->
+  <script type="module">
+
+    import { initializeApp }
+      from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      deleteUser
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      onValue,
+      runTransaction
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    import {
+      getStorage,
+      ref as storageRef,
+      uploadBytes,
+      getDownloadURL
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
+
+
+    // ==========================================
+    // 1. FIREBASE CONFIG
+    // ==========================================
+
+    const firebaseConfig = {
+      apiKey: "ใส่_API_KEY",
+      authDomain: "ใส่_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://ใส่_DATABASE_NAME.firebaseio.com",
+      projectId: "ใส่_PROJECT_ID",
+      storageBucket: "ใส่_STORAGE_BUCKET",
+      messagingSenderId: "ใส่_MESSAGING_SENDER_ID",
+      appId: "ใส่_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+
+    // ==========================================
+    // 2. DOM ELEMENTS
+    // ==========================================
+
+    const $ = id => document.getElementById(id);
+
+    const authScreen = $("authScreen");
+    const mainDashboard = $("mainDashboard");
+    const loginBox = $("loginBox");
+    const registerBox = $("registerBox");
+    const userDisplay = $("userDisplay");
+    const modContainer = $("modContainer");
+    const modCount = $("modCount");
+    const loadingOverlay = $("loadingOverlay");
+
+    let currentUser = null;
+    let stopListeningMods = null;
+
+
+    // ==========================================
+    // 3. HELPERS
+    // ==========================================
+
+    function showLoading(show) {
+      loadingOverlay.classList.toggle("hidden-section", !show);
+    }
+
+    function showMessage(message) {
+      alert(message);
+    }
+
+    function normalizeUsername(username) {
+      return username.trim().toLowerCase();
+    }
+
+    // Firebase Authentication ใช้ email/password
+    // ในตัวอย่างนี้แปลง username เป็นอีเมลภายใน
+    function usernameToEmail(username) {
+      return normalizeUsername(username) + "@modhub.local";
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => {
+        const map = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        };
+        return map[char];
+      });
+    }
+
+    function safeUrl(value) {
+      try {
+        const url = new URL(value);
+        if (url.protocol === "https:" || url.protocol === "http:") {
+          return url.href;
+        }
+      } catch (error) {
+        return "";
+      }
+      return "";
+    }
+
+    function formatTime() {
+      return new Date().toLocaleString("th-TH", {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    }
+
+    function toggleAuth(showLogin) {
+      loginBox.classList.toggle("hidden-section", !showLogin);
+      registerBox.classList.toggle("hidden-section", showLogin);
+    }
+
+    $("showRegister").addEventListener("click", event => {
+      event.preventDefault();
+      toggleAuth(false);
+    });
+
+    $("showLogin").addEventListener("click", event => {
+      event.preventDefault();
+      toggleAuth(true);
+    });
+
+
+    // ==========================================
+    // 4. REGISTER
+    // ==========================================
+
+    $("regForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const username = normalizeUsername($("regUser").value);
+      const password = $("regPass").value;
+
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        showMessage("Username ต้องเป็น a-z, 0-9 หรือ _ และยาว 3-20 ตัว");
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร");
+        return;
+      }
+
+      showLoading(true);
+
+      let createdUser = null;
+
+      try {
+        const credential = await createUserWithEmailAndPassword(
+          auth,
+          usernameToEmail(username),
+          password
+        );
+
+        createdUser = credential.user;
+
+        // จอง username แบบ transaction
+        const usernameRef = ref(db, "usernames/" + username);
+
+        const result = await runTransaction(usernameRef, current => {
+          if (current === null) {
+            return createdUser.uid;
+          }
+          return;
+        });
+
+        if (!result.committed) {
+          await deleteUser(createdUser);
+          createdUser = null;
+          showMessage("ชื่อผู้ใช้นี้ถูกใช้งานแล้ว");
+          return;
+        }
+
+        await set(ref(db, "profiles/" + createdUser.uid), {
+          username,
+          createdAt: Date.now()
+        });
+
+        $("regForm").reset();
+
+        showMessage("สมัครสมาชิกสำเร็จ!");
+      } catch (error) {
+        console.error(error);
+
+        if (error.code === "auth/email-already-in-use") {
+          showMessage("ชื่อผู้ใช้นี้ถูกใช้งานแล้ว");
+        } else if (error.code === "auth/weak-password") {
+          showMessage("รหัสผ่านไม่ปลอดภัย");
+        } else {
+          showMessage("สมัครสมาชิกไม่สำเร็จ: " + error.message);
+        }
+      } finally {
+        showLoading(false);
+      }
+    });
+
+
+    // ==========================================
+    // 5. LOGIN
+    // ==========================================
+
+    $("loginForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      const username = normalizeUsername($("loginUser").value);
+      const password = $("loginPass").value;
+
+      showLoading(true);
+
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          usernameToEmail(username),
+          password
+        );
+
+        $("loginForm").reset();
+      } catch (error) {
+        console.error(error);
+        showMessage("ล็อกอินไม่สำเร็จ กรุณาตรวจสอบชื่อผู้ใช้และรหัสผ่าน");
+      } finally {
+        showLoading(false);
+      }
+    });
+
+
+    // ==========================================
+    // 6. LOGOUT
+    // ==========================================
+
+    $("logoutBtn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        showMessage("ออกจากระบบไม่สำเร็จ");
+      }
+    });
+
+
+    // ==========================================
+    // 7. AUTH STATE
+    // ==========================================
+
+    onAuthStateChanged(auth, async user => {
+      currentUser = user;
+
+      if (user) {
+        authScreen.classList.add("hidden-section");
+        mainDashboard.classList.remove("hidden-section");
+
+        document.body.className = "p-4 md:p-8 block w-full";
+
+        try {
+          const profileRef = ref(db, "profiles/" + user.uid);
+
+          onValue(profileRef, snapshot => {
+            const profile = snapshot.val();
+
+            userDisplay.textContent =
+              profile?.username || user.email || "User";
+          });
+        } catch (error) {
+          userDisplay.textContent = user.email || "User";
+        }
+
+        startListeningMods();
+
+      } else {
+        authScreen.classList.remove("hidden-section");
+        mainDashboard.classList.add("hidden-section");
+
+        document.body.className =
+          "flex items-center justify-center p-4 md:p-8";
+
+        if (stopListeningMods) {
+          stopListeningMods();
+          stopListeningMods = null;
+        }
+      }
+
+      showLoading(false);
+    });
+
+
+    // ==========================================
+    // 8. IMAGE UPLOAD
+    // ==========================================
+
+    async function uploadImage(file) {
+      if (!file) return "";
+
+      if (!file.type.startsWith("image/")) {
+        throw new Error("ไฟล์ที่เลือกไม่ใช่รูปภาพ");
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("รูปภาพต้องมีขนาดไม่เกิน 5 MB");
+      }
+
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+      const path =
+        "mod-images/" +
+        currentUser.uid +
+        "/" +
+        Date.now() +
+        "_" +
+        safeName;
+
+      const fileRef = storageRef(storage, path);
+
+      await uploadBytes(fileRef, file, {
+        contentType: file.type
+      });
+
+      return await getDownloadURL(fileRef);
+    }
+
+
+    // ==========================================
+    // 9. CREATE MOD
+    // ==========================================
+
+    $("modForm").addEventListener("submit", async event => {
+      event.preventDefault();
+
+      if (!currentUser) {
+        showMessage("กรุณาล็อกอินก่อนอัปโหลด");
+        return;
+      }
+
+      const name = $("modName").value.trim();
+      const monster = $("modMonster").value.trim();
+      const version = $("modVersion").value.trim();
+      const link = safeUrl($("modLink").value.trim());
+      const desc = $("modDesc").value.trim();
+      const imgUrl = safeUrl($("modImgUrl").value.trim());
+      const imgFile = $("modImgFile").files[0];
+
+      if (!link) {
+        showMessage("กรุณาใส่ลิงก์ดาวน์โหลดที่ถูกต้อง");
+        return;
+      }
+
+      if ($("modImgUrl").value.trim() && !imgUrl && !imgFile) {
+        showMessage("ลิงก์รูปภาพไม่ถูกต้อง");
+        return;
+      }
+
+      const uploadBtn = $("uploadBtn");
+      const uploadStatus = $("uploadStatus");
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "กำลังอัปโหลด...";
+      uploadStatus.textContent = "กำลังส่งข้อมูลขึ้นคลาวด์";
+
+      try {
+        let finalImage = imgUrl;
+
+        if (imgFile) {
+          finalImage = await uploadImage(imgFile);
+        }
+
+        const modData = {
+          name,
+          monster,
+          version,
+          link,
+          desc,
+          image: finalImage,
+          uploader: userDisplay.textContent,
+          uid: currentUser.uid,
+          time: formatTime(),
+          createdAt: Date.now()
+        };
+
+        const modsRef = ref(db, "mods");
+        const newModRef = push(modsRef);
+
+        await set(newModRef, modData);
+
+        $("modForm").reset();
+        uploadStatus.textContent = "อัปโหลดสำเร็จ!";
+
+        showMessage("อัปโหลด Mod สำเร็จ!");
+      } catch (error) {
+        console.error(error);
+        uploadStatus.textContent = "อัปโหลดไม่สำเร็จ";
+        showMessage("เกิดข้อผิดพลาด: " + error.message);
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML =
+          '<i class="fa-solid fa-cloud-arrow-up mr-2"></i> อัปโหลดขึ้นคลาวด์';
+      }
+    });
+
+
+    // ==========================================
+    // 10. LIVE MOD FEED
+    // ==========================================
+
+    function startListeningMods() {
+      if (stopListeningMods) {
+        stopListeningMods();
+      }
+
+      const modsRef = ref(db, "mods");
+
+      stopListeningMods = onValue(
+        modsRef,
+        snapshot => {
+          modContainer.innerHTML = "";
+
+          if (!snapshot.exists()) {
+            modCount.textContent = "0";
+
+            modContainer.innerHTML = `
+              <div class="col-span-full glass-effect p-12 rounded-2xl text-center text-gray-500">
+                <i class="fa-solid fa-wifi text-4xl mb-3 block"></i>
+                ยังไม่มีรายการ Mod
+                <p class="text-xs mt-2">
+                  คุณสามารถเป็นคนแรกที่อัปโหลดได้
+                </p>
+              </div>
+            `;
+
+            return;
+          }
+
+          const data = snapshot.val();
+
+          const modsList = Object.entries(data)
+            .map(([id, mod]) => ({ id, ...mod }))
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+          modCount.textContent = String(modsList.length);
+
+          modsList.forEach(mod => {
+            const card = document.createElement("article");
+
+            card.className =
+              "glass-effect rounded-2xl overflow-hidden shadow-xl glow-card flex flex-col justify-between";
+
+            const imageUrl = safeUrl(mod.image || "");
+            const downloadUrl = safeUrl(mod.link || "");
+
+            card.innerHTML = `
+              <div>
+                <div class="h-44 w-full bg-slate-900 border-b border-slate-800 relative overflow-hidden">
+
+                  ${
+                    imageUrl
+                      ? `<img src="${escapeHtml(imageUrl)}"
+                          alt="${escapeHtml(mod.name)}"
+                          loading="lazy"
+                          class="w-full h-full object-cover">`
+                      : `<div class="w-full h-full flex items-center justify-center text-cyan-400">
+                          <i class="fa-solid fa-cube text-5xl"></i>
+                        </div>`
+                  }
+
+                  <span class="absolute top-3 left-3 bg-slate-950/80 text-cyan-400 text-xs px-2.5 py-1 rounded-md border border-cyan-500/20">
+                    ${escapeHtml(mod.monster)}
+                  </span>
+
+                  <span class="absolute bottom-3 right-3 bg-cyan-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    ${escapeHtml(mod.version)}
+                  </span>
+                </div>
+
+                <div class="p-4">
+                  <h3 class="text-base font-bold text-white mb-2">
+                    ${escapeHtml(mod.name)}
+                  </h3>
+
+                  <div class="text-[11px] text-gray-400 mb-3 flex justify-between gap-2">
+                    <span>
+                      ผู้โพสต์:
+                      <span class="text-cyan-400">
+                        ${escapeHtml(mod.uploader)}
+                      </span>
+                    </span>
+
+                    <span>${escapeHtml(mod.time)}</span>
+                  </div>
+
+                  <p class="text-xs text-gray-400 bg-slate-950/40 p-3 rounded-lg border border-slate-900/60 whitespace-pre-wrap break-words">
+                    ${escapeHtml(mod.desc || "ไม่มีคำอธิบาย")}
+                  </p>
+                </div>
+              </div>
+
+              <div class="p-4 pt-0">
+                ${
+                  downloadUrl
+                    ? `<a href="${escapeHtml(downloadUrl)}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-semibold py-3 rounded-xl flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i>
+                        ดาวน์โหลดไฟล์
+                      </a>`
+                    : `<div class="text-xs text-red-400">ลิงก์ดาวน์โหลดไม่ถูกต้อง</div>`
+                }
+              </div>
+            `;
+
+            modContainer.appendChild(card);
+          });
+        },
+        error => {
+          console.error(error);
+
+          modContainer.innerHTML = `
+            <div class="col-span-full glass-effect p-8 rounded-2xl text-center text-red-400">
+              ไม่สามารถโหลดข้อมูลได้
+              <p class="text-xs mt-2">${escapeHtml(error.message)}</p>
+            </div>
+          `;
+        }
+      );
+    }
+
+  </script>
+</body>
+</html>
