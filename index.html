@@ -1,12 +1,22 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Realtime Mod Hub v4.0</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Global Realtime Mod Hub v6.0</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
+
     <style>
         body {
             font-family: 'Kanit', sans-serif;
@@ -14,366 +24,832 @@
             min-height: 100vh;
             color: #f8fafc;
         }
+
         .glass-effect {
             background: rgba(255, 255, 255, 0.02);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
+
+        .glow-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .glow-card:hover {
             box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
             transform: translateY(-4px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .hidden-section { display: none !important; }
+
+        .hidden-section {
+            display: none !important;
+        }
+
+        input, textarea {
+            color-scheme: dark;
+        }
     </style>
 </head>
-<body class="flex items-center justify-center p-4 md:p-8">
 
-    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4">
+<body class="p-4 md:p-8 block w-full">
+
+    <!-- Loading -->
+    <div id="loadingOverlay"
+         class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex flex-col items-center justify-center gap-4">
+
         <div class="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-cyan-400 animate-pulse">กำลังเชื่อมต่อฐานข้อมูลโกลบอล...</p>
+
+        <p id="loadingText" class="text-sm text-cyan-400 animate-pulse">
+            กำลังเชื่อมต่อฐานข้อมูลโกลบอล...
+        </p>
     </div>
 
-    <!-- ==================== 1. โซนระบบสมาชิก (AUTH SCREEN) ==================== -->
-    <div id="authScreen" class="w-full max-w-md glass-effect p-8 rounded-3xl shadow-2xl relative overflow-hidden hidden-section">
-        <div class="absolute -top-10 -left-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
-
-        <!-- หน้าเข้าสู่ระบบ (Login) -->
-        <div id="loginBox">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">GLOBAL LOGIN</h2>
-                <p class="text-xs text-gray-400 mt-1">ล็อกอินเพื่อเข้าสู่เซิร์ฟเวอร์หลัก</p>
-            </div>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">ชื่อผู้ใช้งาน (Username)</label>
-                    <input type="text" id="loginUser" required class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-white">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">รหัสผ่าน (Password)</label>
-                    <input type="password" id="loginPass" required class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 text-white">
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-medium py-3 rounded-xl text-sm transition-all duration-300 cursor-pointer shadow-lg shadow-cyan-600/20">
-                    เข้าสู่เซิร์ฟเวอร์
-                </button>
-            </form>
-            <p class="text-center text-xs text-gray-400 mt-6">
-                ยังไม่มีชื่อในระบบ? <a href="#" onclick="toggleAuth(false); return false;" class="text-cyan-400 hover:underline font-medium">สมัครสมาชิกใหม่ที่นี่</a>
-            </p>
-        </div>
-
-        <!-- หน้าสมัครสมาชิก (Register) -->
-        <div id="registerBox" class="hidden-section">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">CREATE ACCOUNT</h2>
-                <p class="text-xs text-gray-400 mt-1">สมัครสมาชิกเพื่อซิงค์ข้อมูลทั่วโลก</p>
-            </div>
-            <form id="regForm" class="space-y-4">
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">ตั้งชื่อผู้ใช้งาน (Username)</label>
-                    <input type="text" id="regUser" required class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500 text-white">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1">ตั้งรหัสผ่าน (Password)</label>
-                    <input type="password" id="regPass" required class="w-full bg-slate-900/80 border border-gray-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500 text-white">
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-medium py-3 rounded-xl text-sm transition-all duration-300 cursor-pointer shadow-lg shadow-purple-600/20">
-                    ยืนยันการสมัครสมาชิก
-                </button>
-            </form>
-            <p class="text-center text-xs text-gray-400 mt-6">
-                มีบัญชีอยู่แล้ว? <a href="#" onclick="toggleAuth(true); return false;" class="text-purple-400 hover:underline font-medium">เข้าสู่ระบบตรงนี้</a>
-            </p>
-        </div>
-    </div>
-
-
-    <!-- ==================== 2. โซนหน้าเว็บหลัก (MAIN DASHBOARD) ==================== -->
-    <div id="mainDashboard" class="w-full max-w-7xl mx-auto hidden-section">
-        <!-- Top Profile Bar -->
-        <div class="flex justify-between items-center mb-6 glass-effect p-4 rounded-2xl">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-cyan-500/10 rounded-full border border-cyan-400/30 flex items-center justify-center text-cyan-400">
-                    <i class="fa-solid fa-earth-asia animate-pulse"></i>
-                </div>
-                <div>
-                    <div class="text-xs text-gray-400">ผู้ใช้งานออนไลน์</div>
-                    <div id="userDisplay" class="text-sm font-semibold text-white">Guest</div>
-                </div>
-            </div>
-            <button onclick="logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-xs font-medium px-4 py-2 rounded-xl border border-red-500/20 transition-all cursor-pointer">
-                ออกจากระบบคลาวด์ <i class="fa-solid fa-power-off ml-1"></i>
-            </button>
-        </div>
+    <!-- Dashboard -->
+    <div id="mainDashboard" class="w-full max-w-7xl mx-auto">
 
         <header class="text-center my-6 relative">
-            <h1 class="text-3xl md:text-5xl font-bold tracking-wide bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500 bg-clip-text text-transparent mb-2">
-                <i class="fa-solid fa-network-wired mr-2 text-cyan-400"></i>GLOBAL REALTIME HUB
+
+            <div class="absolute top-0 left-1/2 -translate-x-1/2
+                        w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl -z-10">
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-bold tracking-wide
+                       bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-500
+                       bg-clip-text text-transparent mb-2">
+
+                <i class="fa-solid fa-network-wired mr-2 text-cyan-400"></i>
+                GLOBAL REALTIME HUB
+
             </h1>
-            <p class="text-gray-400 text-xs md:text-sm">ทุกคนจากทั่วโลกสามารถมองเห็น บันทึก และอัปเดตไฟล์ร่วมกันได้ทันที</p>
+
+            <p class="text-gray-400 text-xs md:text-sm">
+                แชร์ข้อมูลและอัปเดตไฟล์ร่วมกันผ่านฐานข้อมูลออนไลน์
+            </p>
+
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-            <!-- ฟอร์มสร้างข้อเสนอ Mod -->
+
+            <!-- Upload Form -->
             <section class="lg:col-span-1">
+
                 <div class="glass-effect p-6 rounded-2xl shadow-2xl sticky top-6">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-cyan-400 border-b border-gray-800 pb-3">
-                        <i class="fa-solid fa-cloud-arrow-up animate-bounce"></i> ส่งไฟล์เข้าสู่ระบบคลาวด์
+
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2
+                               text-cyan-400 border-b border-gray-800 pb-3">
+
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        ส่งข้อมูลเข้าสู่ระบบคลาวด์
+
                     </h2>
-                    
+
                     <form id="modForm" class="space-y-4">
+
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">ชื่อ Mod / Application</label>
-                            <input type="text" id="modName" required placeholder="เช่น PUBG Mobile Mega Mod" class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 text-white">
+                            <label class="block text-xs text-gray-400 mb-1">
+                                ชื่อผู้แชร์
+                            </label>
+
+                            <input type="text"
+                                   id="modUploader"
+                                   maxlength="50"
+                                   required
+                                   placeholder="Anonymous"
+                                   class="w-full bg-slate-900/60 border border-gray-700
+                                          rounded-lg px-3 py-2 text-xs
+                                          focus:outline-none focus:border-cyan-500">
                         </div>
+
+                        <div>
+                            <label class="block text-xs text-gray-400 mb-1">
+                                ชื่อ Mod / Application
+                            </label>
+
+                            <input type="text"
+                                   id="modName"
+                                   maxlength="100"
+                                   required
+                                   placeholder="ชื่อ Mod"
+                                   class="w-full bg-slate-900/60 border border-gray-700
+                                          rounded-lg px-3 py-2 text-xs
+                                          focus:outline-none focus:border-cyan-500">
+                        </div>
+
                         <div class="grid grid-cols-2 gap-2">
+
                             <div>
-                                <label class="block text-xs text-gray-400 mb-1">เกม / มอนสเตอร์</label>
-                                <input type="text" id="modMonster" required placeholder="เช่น บอส, มอนสเตอร์" class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 text-white">
+                                <label class="block text-xs text-gray-400 mb-1">
+                                    เกม / มอนสเตอร์
+                                </label>
+
+                                <input type="text"
+                                       id="modMonster"
+                                       maxlength="50"
+                                       required
+                                       placeholder="เกม"
+                                       class="w-full bg-slate-900/60 border border-gray-700
+                                              rounded-lg px-3 py-2 text-xs
+                                              focus:outline-none focus:border-cyan-500">
                             </div>
+
                             <div>
-                                <label class="block text-xs text-gray-400 mb-1">เวอร์ชัน (Version)</label>
-                                <input type="text" id="modVersion" required placeholder="v1.0" class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 text-white">
+                                <label class="block text-xs text-gray-400 mb-1">
+                                    เวอร์ชัน
+                                </label>
+
+                                <input type="text"
+                                       id="modVersion"
+                                       maxlength="30"
+                                       required
+                                       placeholder="v1.0"
+                                       class="w-full bg-slate-900/60 border border-gray-700
+                                              rounded-lg px-3 py-2 text-xs
+                                              focus:outline-none focus:border-cyan-500">
                             </div>
+
                         </div>
+
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">รูปภาพประกอบ (ลิงก์รูปภาพ หรือ อัปโหลดไฟล์)</label>
-                            <input type="file" id="modImgFile" accept="image/*" class="w-full text-xs text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-cyan-600 file:text-white hover:file:bg-cyan-500 bg-slate-900/40 p-1.5 rounded-lg border border-gray-700 mb-2">
-                            <input type="url" id="modImgUrl" placeholder="หรือวางลิงก์รูปภาพสาธารณะ..." class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 text-white">
+
+                            <label class="block text-xs text-gray-400 mb-1">
+                                รูปภาพประกอบ
+                            </label>
+
+                            <input type="file"
+                                   id="modImgFile"
+                                   accept="image/jpeg,image/png,image/webp,image/gif"
+                                   class="w-full text-xs text-gray-400
+                                          bg-slate-900/40 p-1.5 rounded-lg
+                                          border border-gray-700 mb-2">
+
+                            <input type="url"
+                                   id="modImgUrl"
+                                   placeholder="หรือใส่ URL รูปภาพ"
+                                   class="w-full bg-slate-900/60 border border-gray-700
+                                          rounded-lg px-3 py-2 text-xs
+                                          focus:outline-none focus:border-cyan-500">
+
+                            <p class="text-[10px] text-gray-500 mt-1">
+                                รูปที่อัปโหลดต้องมีขนาดไม่เกิน 500 KB
+                            </p>
+
                         </div>
+
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">ลิงก์ดาวน์โหลดตัวไฟล์ APK</label>
-                            <input type="url" id="modLink" required placeholder="https://..." class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 text-white">
+
+                            <label class="block text-xs text-gray-400 mb-1">
+                                ลิงก์ดาวน์โหลด
+                            </label>
+
+                            <input type="url"
+                                   id="modLink"
+                                   required
+                                   placeholder="https://..."
+                                   class="w-full bg-slate-900/60 border border-gray-700
+                                          rounded-lg px-3 py-2 text-xs
+                                          focus:outline-none focus:border-cyan-500">
+
                         </div>
+
                         <div>
-                            <label class="block text-xs text-gray-400 mb-1">สรรพคุณคำอธิบาย</label>
-                            <textarea id="modDesc" rows="3" required placeholder="วิธีใช้งานโปร..." class="w-full bg-slate-900/60 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-cyan-500 text-white resize-none"></textarea>
+
+                            <label class="block text-xs text-gray-400 mb-1">
+                                คำอธิบาย
+                            </label>
+
+                            <textarea id="modDesc"
+                                      rows="3"
+                                      maxlength="1000"
+                                      required
+                                      placeholder="รายละเอียด..."
+                                      class="w-full bg-slate-900/60 border border-gray-700
+                                             rounded-lg px-3 py-2 text-xs
+                                             focus:outline-none focus:border-cyan-500
+                                             resize-none"></textarea>
+
                         </div>
-                        <button type="submit" class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-medium py-2.5 rounded-lg text-xs transition-all cursor-pointer">
-                            <i class="fa-solid fa-satellite-dish animate-pulse"></i> อัปโหลดกระจายสัญญาณทั่วโลกเดี่ยวนี้
+
+                        <button id="submitBtn"
+                                type="submit"
+                                class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600
+                                       hover:from-cyan-500 hover:to-indigo-500
+                                       text-white font-medium py-2.5 rounded-lg
+                                       text-xs transition-all cursor-pointer">
+
+                            <i class="fa-solid fa-satellite-dish"></i>
+                            อัปโหลดข้อมูล
+
                         </button>
+
                     </form>
+
                 </div>
+
             </section>
 
+            <!-- Live Database -->
             <section class="lg:col-span-2">
+
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-lg font-semibold flex items-center gap-2 text-cyan-400">
-                        <i class="fa-solid fa-globe text-indigo-400 animate-spin" style="animation-duration: 15s;"></i> ฟีดอัปเดตสดจากทั่วโลก (Live Database)
+
+                    <h2 class="text-lg font-semibold flex items-center gap-2
+                               text-cyan-400">
+
+                        <i class="fa-solid fa-globe text-indigo-400"></i>
+                        ฟีดอัปเดตสด
+
                     </h2>
-                    <span id="modCount" class="bg-slate-800 text-xs text-cyan-400 px-3 py-1 rounded-full border border-slate-700">0 รายการ</span>
+
+                    <span id="modCount"
+                          class="bg-slate-800 text-xs text-cyan-400 px-3 py-1
+                                 rounded-full border border-slate-700">
+                        0 รายการ
+                    </span>
+
                 </div>
-                <div id="modContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div id="modContainer"
+                     class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div class="glass-effect p-8 rounded-2xl text-center text-gray-500">
+                        กำลังโหลดข้อมูล...
+                    </div>
+
                 </div>
+
             </section>
+
         </div>
+
     </div>
 
+    <!-- Firebase Realtime Database -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, push, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        import {
+            initializeApp
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+        import {
+            getDatabase,
+            ref,
+            push,
+            set,
+            onValue,
+            onDisconnect
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+
+        // =========================================
+        // 1. ตั้งค่า Firebase
+        // =========================================
 
         const firebaseConfig = {
-            databaseURL: "https://global-mod-hub-default-rtdb.firebaseio.com/" 
+
+            apiKey: "YOUR_API_KEY",
+
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+
+            databaseURL: "https://YOUR_DATABASE_NAME.firebaseio.com",
+
+            projectId: "YOUR_PROJECT_ID",
+
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+
+            appId: "YOUR_APP_ID"
+
         };
 
+
         const app = initializeApp(firebaseConfig);
+
         const db = getDatabase(app);
 
-        let currentUser = localStorage.getItem('modHubSession') || null;
 
-        const authScreen = document.getElementById('authScreen');
-        const mainDashboard = document.getElementById('mainDashboard');
-        const loginBox = document.getElementById('loginBox');
-        const registerBox = document.getElementById('registerBox');
-        const userDisplay = document.getElementById('userDisplay');
-        const modContainer = document.getElementById('modContainer');
-        const modCount = document.getElementById('modCount');
-        const loadingOverlay = document.getElementById('loadingOverlay');
+        // =========================================
+        // 2. ตัวแปรหลัก
+        // =========================================
 
-        window.toggleAuth = function(showLogin) {
-            if(showLogin) {
-                loginBox.classList.remove('hidden-section');
-                registerBox.classList.add('hidden-section');
-            } else {
-                loginBox.classList.add('hidden-section');
-                registerBox.classList.remove('hidden-section');
-            }
-        }
+        const modContainer = document.getElementById("modContainer");
 
-        // เชื่อมต่อครั้งแรกสำเร็จ ปิดหน้าจอโหลด
-        const dbRef = ref(db);
-        loadingOverlay.classList.add('hidden-section');
-        checkSession();
+        const modCount = document.getElementById("modCount");
 
-        // --- แก้ไขปัญหาระบบลงทะเบียนสมาชิก (ดึงข้อมูลแบบครั้งเดียว ปล่อยการทำงานปุ่มทันที) ---
-        document.getElementById('regForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const user = document.getElementById('regUser').value.trim();
-            const pass = document.getElementById('regPass').value;
+        const loadingOverlay = document.getElementById("loadingOverlay");
 
-            if(!user || !pass) {
-                alert('❌ กรุณากรอกข้อมูลให้ครบถ้วน');
-                return;
-            }
+        const loadingText = document.getElementById("loadingText");
 
-            get(child(dbRef, `users/${user}`)).then((snapshot) => {
-                if(snapshot.exists()) {
-                    alert('❌ ชื่อผู้ใช้นี้มีคนใช้บนโลกออนไลน์ไปแล้ว!');
-                } else {
-                    set(ref(db, 'users/' + user), { password: pass })
-                    .then(() => {
-                        alert('🎉 ลงทะเบียนสมาชิกสำเร็จแล้ว! ระบบจะสลับไปหน้าเข้าสู่ระบบให้ท่าน');
-                        document.getElementById('regForm').reset();
-                        window.toggleAuth(true);
-                    }).catch((err) => {
-                        alert('❌ ไม่สามารถสมัครได้สำเร็จ: ' + err.message);
-                    });
-                }
-            }).catch((error) => {
-                alert('❌ ตรวจสอบฐานข้อมูลล้มเหลว: ' + error.message);
+        const modForm = document.getElementById("modForm");
+
+        const submitBtn = document.getElementById("submitBtn");
+
+
+        let isConnected = false;
+
+
+        // =========================================
+        // 3. ฟังก์ชัน Escape HTML
+        // =========================================
+
+        function escapeHtml(value) {
+
+            return String(value ?? "").replace(/[&<>"']/g, function(char) {
+
+                const entities = {
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#39;"
+                };
+
+                return entities[char];
+
             });
-        });
 
-        // --- ระบบล็อกอินสแกนบัญชีจากฐานข้อมูลกลางทั่วโลก ---
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const user = document.getElementById('loginUser').value.trim();
-            const pass = document.getElementById('loginPass').value;
+        }
 
-            get(child(dbRef, `users/${user}`)).then((snapshot) => {
-                if(snapshot.exists() && snapshot.val().password === pass) {
-                    currentUser = user;
-                    localStorage.setItem('modHubSession', user);
-                    checkSession();
-                } else {
-                    alert('❌ ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง หรือโปรดสมัครสมาชิกก่อน!');
+
+        // =========================================
+        // 4. ตรวจสอบ URL
+        // =========================================
+
+        function safeUrl(value) {
+
+            try {
+
+                const url = new URL(value);
+
+                if (url.protocol === "https:" || url.protocol === "http:") {
+                    return url.href;
                 }
-            }).catch((error) => {
-                alert('❌ เชื่อมต่อผิดพลาด: ' + error.message);
-            });
-        });
 
-        window.logout = function() {
-            localStorage.removeItem('modHubSession');
-            currentUser = null;
-            checkSession();
-        }
+            } catch (error) {
 
-        function checkSession() {
-            if(currentUser) {
-                authScreen.classList.add('hidden-section');
-                mainDashboard.classList.remove('hidden-section');
-                document.body.className = "p-4 md:p-8 block w-full";
-                userDisplay.innerText = currentUser;
-                startListeningMods();
-            } else {
-                authScreen.classList.remove('hidden-section');
-                mainDashboard.classList.add('hidden-section');
-                document.body.className = "flex items-center justify-center p-4 md:p-8";
+                return "";
+
             }
+
+            return "";
+
         }
+
+
+        // =========================================
+        // 5. แปลงรูปเป็น Base64
+        // =========================================
 
         function getBase64(file) {
+
             return new Promise((resolve, reject) => {
+
                 const reader = new FileReader();
-                reader.readAsDataURL(file);
+
                 reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
+
+                reader.onerror = () => reject(
+                    new Error("ไม่สามารถอ่านไฟล์รูปภาพได้")
+                );
+
+                reader.readAsDataURL(file);
+
             });
+
         }
 
-        document.getElementById('modForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
 
-            const name = document.getElementById('modName').value;
-            const monster = document.getElementById('modMonster').value;
-            const version = document.getElementById('modVersion').value;
-            const link = document.getElementById('modLink').value;
-            const desc = document.getElementById('modDesc').value;
-            const imgUrl = document.getElementById('modImgUrl').value;
-            const imgFile = document.getElementById('modImgFile').files;
+        // =========================================
+        // 6. ตรวจสอบสถานะ Firebase
+        // =========================================
 
-            let finalImage = "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500";
+        onValue(
+            ref(db, ".info/connected"),
 
-            if (imgFile.length > 0) {
-                finalImage = await getBase64(imgFile[0]);
-            } else if (imgUrl) {
-                finalImage = imgUrl;
-            }
+            (snapshot) => {
 
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' | ' + now.toLocaleDateString('th-TH');
+                isConnected = snapshot.val() === true;
 
-            const modData = {
-                name, monster, version, link, desc, image: finalImage,
-                uploader: currentUser, time: timeString
-            };
+                if (isConnected) {
 
-            const modsRef = ref(db, 'mods');
-            const newModRef = push(modsRef);
-            set(newModRef, modData).then(() => {
-                document.getElementById('modForm').reset();
-                alert('🚀 ยิงข้อมูล Mod ขึ้นคลาวด์เสร็จสิ้น! ทุกคนทั่วโลกเห็นโพสต์นี้แล้ว');
-            });
-        });
+                    loadingOverlay.classList.add("hidden-section");
 
-        function startListeningMods() {
-            const modsRef = ref(db, 'mods');
-            onValue(modsRef, (snapshot) => {
-                modContainer.innerHTML = '';
-                
-                if (!snapshot.exists()) {
-                    modCount.innerText = "0 รายการ";
-                    modContainer.innerHTML = `
-                        <div class="col-span-full glass-effect p-12 rounded-2xl text-center text-gray-500">
-                            <i class="fa-solid fa-wifi text-4xl mb-3 block"></i>
-                            ระบบออนไลน์พร้อมแล้ว แต่ออนไลน์เซิร์ฟเวอร์ยังไม่มีข้อมูลเข้ามาเป็นคนแรกเลยสิ!
-                        </div>
-                    `;
-                    return;
+                } else {
+
+                    loadingText.textContent =
+                        "กำลังเชื่อมต่อฐานข้อมูลใหม่...";
+
+                    loadingOverlay.classList.remove("hidden-section");
+
                 }
 
-                const data = snapshot.val();
-                const modsList = Object.keys(data).map(key => data[key]);
-                modCount.innerText = `${modsList.length} รายการ`;
+            },
 
-                modsList.reverse().forEach(mod => {
-                    const card = document.createElement('div');
-                    card.className = 'glass-effect rounded-2xl overflow-hidden shadow-xl glow-card flex flex-col justify-between';
-                    card.innerHTML = `
-                        <div>
-                            <div class="h-44 w-full bg-cover bg-center border-b border-slate-800 relative" style="background-image: url('${mod.image}');">
-                                <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-sm text-cyan-400 text-xs px-2.5 py-1 rounded-md border border-cyan-500/20">
-                                    <i class="fa-solid fa-cube mr-1"></i> ${escapeHtml(mod.monster)}
-                                </span>
-                                <span class="absolute bottom-3 right-3 bg-cyan-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
-                                    ${escapeHtml(mod.version)}
-                                </span>
+            (error) => {
+
+                console.error("Connection Error:", error);
+
+                loadingText.textContent =
+                    "ไม่สามารถเชื่อมต่อ Firebase ได้";
+
+            }
+
+        );
+
+
+        // =========================================
+        // 7. อัปโหลดข้อมูล
+        // =========================================
+
+        modForm.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            if (!isConnected) {
+
+                alert("ยังไม่ได้เชื่อมต่อ Firebase");
+
+                return;
+
+            }
+
+            submitBtn.disabled = true;
+
+            submitBtn.innerHTML =
+                '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลด...';
+
+            try {
+
+                const uploader =
+                    document.getElementById("modUploader").value.trim();
+
+                const name =
+                    document.getElementById("modName").value.trim();
+
+                const monster =
+                    document.getElementById("modMonster").value.trim();
+
+                const version =
+                    document.getElementById("modVersion").value.trim();
+
+                const link =
+                    safeUrl(document.getElementById("modLink").value.trim());
+
+                const desc =
+                    document.getElementById("modDesc").value.trim();
+
+                const imgUrl =
+                    safeUrl(document.getElementById("modImgUrl").value.trim());
+
+                const imgFile =
+                    document.getElementById("modImgFile").files[0];
+
+
+                // ตรวจสอบลิงก์ดาวน์โหลด
+
+                if (!link) {
+
+                    throw new Error("กรุณาใส่ลิงก์ดาวน์โหลดที่ถูกต้อง");
+
+                }
+
+
+                // รูปภาพเริ่มต้น
+
+                let finalImage =
+                    "https://placehold.co/600x400/0f172a/06b6d4?text=Mod+Hub";
+
+
+                // ถ้ามีไฟล์รูปภาพ
+
+                if (imgFile) {
+
+                    if (!imgFile.type.startsWith("image/")) {
+
+                        throw new Error("ไฟล์ที่เลือกไม่ใช่รูปภาพ");
+
+                    }
+
+                    if (imgFile.size > 500 * 1024) {
+
+                        throw new Error("รูปภาพต้องมีขนาดไม่เกิน 500 KB");
+
+                    }
+
+                    finalImage = await getBase64(imgFile);
+
+                } else if (imgUrl) {
+
+                    finalImage = imgUrl;
+
+                }
+
+
+                // เวลาปัจจุบัน
+
+                const now = new Date();
+
+                const timeString =
+                    now.toLocaleTimeString("th-TH", {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    })
+                    + " | "
+                    + now.toLocaleDateString("th-TH");
+
+
+                // ข้อมูลที่จะบันทึก
+
+                const modData = {
+
+                    name,
+
+                    monster,
+
+                    version,
+
+                    link,
+
+                    desc,
+
+                    image: finalImage,
+
+                    uploader,
+
+                    time: timeString,
+
+                    timestamp: Date.now()
+
+                };
+
+
+                // บันทึกข้อมูลลง Firebase
+
+                const modsRef = ref(db, "mods");
+
+                const newModRef = push(modsRef);
+
+                await set(newModRef, modData);
+
+
+                // ล้างฟอร์ม
+
+                document.getElementById("modName").value = "";
+
+                document.getElementById("modMonster").value = "";
+
+                document.getElementById("modVersion").value = "";
+
+                document.getElementById("modLink").value = "";
+
+                document.getElementById("modDesc").value = "";
+
+                document.getElementById("modImgUrl").value = "";
+
+                document.getElementById("modImgFile").value = "";
+
+
+                alert("อัปโหลดข้อมูลสำเร็จ!");
+
+            } catch (error) {
+
+                console.error("Upload Error:", error);
+
+                alert("เกิดข้อผิดพลาด: " + error.message);
+
+            } finally {
+
+                submitBtn.disabled = false;
+
+                submitBtn.innerHTML =
+                    '<i class="fa-solid fa-satellite-dish"></i> อัปโหลดข้อมูล';
+
+            }
+
+        });
+
+
+        // =========================================
+        // 8. ดึงข้อมูล Realtime
+        // =========================================
+
+        function startListeningMods() {
+
+            const modsRef = ref(db, "mods");
+
+            onValue(
+
+                modsRef,
+
+                (snapshot) => {
+
+                    modContainer.innerHTML = "";
+
+                    if (!snapshot.exists()) {
+
+                        modCount.textContent = "0 รายการ";
+
+                        modContainer.innerHTML = `
+                            <div class="col-span-full glass-effect p-12
+                                        rounded-2xl text-center text-gray-500">
+
+                                <i class="fa-solid fa-wifi text-4xl mb-3 block"></i>
+
+                                ระบบออนไลน์พร้อมใช้งาน
+                                เริ่มเพิ่มข้อมูลรายการแรกได้ทันที!
+
                             </div>
-                            <div class="p-4">
-                                <h3 class="text-base font-bold text-white mb-1 line-clamp-1">${escapeHtml(mod.name)}</h3>
-                                <div class="text-[11px] text-gray-400 mb-3 flex justify-between">
-                                    <span>อัปโหลดโดย: <span class="text-cyan-400">${escapeHtml(mod.uploader)}</span></span>
-                                    <span><i class="fa-regular fa-clock"></i> ${mod.time}</span>
+                        `;
+
+                        return;
+
+                    }
+
+
+                    const data = snapshot.val();
+
+
+                    // เรียงตามเวลาใหม่สุดก่อน
+
+                    const modsList = Object.entries(data)
+                        .map(([id, mod]) => ({
+                            id,
+                            ...mod
+                        }))
+                        .sort((a, b) =>
+                            (b.timestamp || 0) - (a.timestamp || 0)
+                        );
+
+
+                    modCount.textContent =
+                        `${modsList.length} รายการ`;
+
+
+                    // สร้างการ์ด
+
+                    modsList.forEach((mod) => {
+
+                        const card = document.createElement("div");
+
+                        card.className =
+                            "glass-effect rounded-2xl overflow-hidden " +
+                            "shadow-xl glow-card flex flex-col justify-between";
+
+
+                        const image = safeUrl(mod.image) ||
+                            "https://placehold.co/600x400/0f172a/06b6d4?text=Mod+Hub";
+
+                        const downloadLink = safeUrl(mod.link);
+
+
+                        card.innerHTML = `
+
+                            <div>
+
+                                <div class="h-44 w-full bg-cover bg-center
+                                            border-b border-slate-800 relative"
+                                     style="background-image: url('${escapeHtml(image)}');">
+
+                                    <span class="absolute top-3 left-3
+                                                 bg-slate-950/80 text-cyan-400
+                                                 text-xs px-2.5 py-1 rounded-md
+                                                 border border-cyan-500/20">
+
+                                        <i class="fa-solid fa-cube mr-1"></i>
+
+                                        ${escapeHtml(mod.monster)}
+
+                                    </span>
+
+                                    <span class="absolute bottom-3 right-3
+                                                 bg-cyan-600 text-white
+                                                 text-[10px] font-bold px-2 py-0.5
+                                                 rounded-full">
+
+                                        ${escapeHtml(mod.version)}
+
+                                    </span>
+
                                 </div>
-                                <p class="text-xs text-gray-400 bg-slate-950/40 p-2.5 rounded-lg border border-slate-900/60 line-clamp-3">${escapeHtml(mod.desc)}</p>
+
+
+                                <div class="p-4">
+
+                                    <h3 class="text-base font-bold text-white mb-1
+                                               line-clamp-1">
+
+                                        ${escapeHtml(mod.name)}
+
+                                    </h3>
+
+
+                                    <div class="text-[11px] text-gray-400 mb-3
+                                                flex justify-between gap-2">
+
+                                        <span>
+
+                                            แชร์โดย:
+
+                                            <span class="text-cyan-400">
+
+                                                ${escapeHtml(mod.uploader)}
+
+                                            </span>
+
+                                        </span>
+
+                                        <span>
+
+                                            <i class="fa-regular fa-clock"></i>
+
+                                            ${escapeHtml(mod.time)}
+
+                                        </span>
+
+                                    </div>
+
+
+                                    <p class="text-xs text-gray-400 bg-slate-950/40
+                                              p-2.5 rounded-lg border
+                                              border-slate-900/60 line-clamp-3">
+
+                                        ${escapeHtml(mod.desc)}
+
+                                    </p>
+
+                                </div>
+
                             </div>
-                        </div>
-                        <div class="p-4 pt-0">
-                            <a href="${escapeHtml(mod.link)}" target="_blank" class="w-full bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-semibold py-2 rounded-xl flex items-center justify-center gap-1 transition-all text-center">
-                                <i class="fa-solid fa-download"></i> ดาวน์โหลดไฟล์ผ่านเซิร์ฟเวอร์โกลบอล
-                            </a>
+
+
+                            <div class="p-4 pt-0">
+
+                                ${
+                                    downloadLink
+                                    ?
+                                    `<a href="${escapeHtml(downloadLink)}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="w-full bg-gradient-to-r
+                                               from-cyan-600 to-indigo-600
+                                               hover:from-cyan-500
+                                               hover:to-indigo-500
+                                               text-white text-xs font-semibold
+                                               py-2 rounded-xl flex items-center
+                                               justify-center gap-1">
+
+                                        <i class="fa-solid fa-download"></i>
+
+                                        ดาวน์โหลดไฟล์
+
+                                    </a>`
+                                    :
+                                    `<span class="text-gray-500 text-xs">
+                                        ไม่มีลิงก์ดาวน์โหลด
+                                    </span>`
+                                }
+
+                            </div>
+
+                        `;
+
+
+                        modContainer.appendChild(card);
+
+                    });
+
+                },
+
+                (error) => {
+
+                    console.error("Realtime Error:", error);
+
+                    modContainer.innerHTML = `
+                        <div class="col-span-full glass-effect p-8
+                                    rounded-2xl text-center text-red-400">
+
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+
+                            ไม่สามารถอ่านข้อมูลจาก Firebase ได้
+
+                            <p class="text-xs mt-2 text-gray-500">
+                                ${escapeHtml(error.message)}
+                            </p>
+
                         </div>
                     `;
-                    modContainer.appendChild(card);
-                });
-            });
+
+                }
+
+            );
+
         }
 
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
+
+        // เริ่มรับข้อมูล
+
+        startListeningMods();
+
     </script>
+
 </body>
 </html>
