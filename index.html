@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090d16">
+<title>Global Mod Hub v3.0</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{font-family:Kanit,sans-serif;background:linear-gradient(135deg,#090d16,#111827);min-height:100vh;color:#f8fafc}
+.glass{background:rgba(255,255,255,.035);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08)}
+.hidden-section{display:none!important}.glow-card{transition:.25s}.glow-card:hover{transform:translateY(-4px);box-shadow:0 0 24px #06b6d433}
+input,textarea,select{color:#fff!important}input::placeholder,textarea::placeholder{color:#64748b}.field{width:100%;background:#0f172acc;border:1px solid #334155;border-radius:10px;padding:10px 12px;font-size:13px;outline:none}.field:focus{border-color:#06b6d4}
+.btn{border-radius:11px;padding:10px 14px;font-size:13px;font-weight:500;transition:.2s}.btn-primary{background:linear-gradient(90deg,#0891b2,#4f46e5)}.btn-primary:hover{filter:brightness(1.15)}.btn-muted{background:#1e293b;border:1px solid #334155}.btn-danger{background:#7f1d1d55;border:1px solid #ef444455;color:#fca5a5}
+.card-image{height:180px;background:#0f172a;display:flex;align-items:center;justify-content:center;overflow:hidden}.card-image img{width:100%;height:100%;object-fit:cover}.line-clamp-3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+</style>
+</head>
+<body class="p-4 md:p-8">
+<!-- AUTH -->
+<main id="authScreen" class="min-h-[85vh] flex items-center justify-center">
+<section class="glass w-full max-w-md p-7 md:p-8 rounded-3xl relative overflow-hidden">
+<div class="absolute -top-10 -left-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
+<div id="loginBox" class="relative">
+<div class="text-center mb-7"><div class="text-cyan-400 text-4xl mb-2"><i class="fa-solid fa-cubes"></i></div><h1 class="text-3xl font-bold text-cyan-300">GLOBAL MOD HUB</h1><p class="text-xs text-slate-400 mt-2">เข้าสู่ระบบเพื่อจัดการคลัง Mod ของคุณ</p></div>
+<form id="loginForm" class="space-y-4">
+<label class="block text-xs text-slate-400">ชื่อผู้ใช้<input id="loginUser" class="field mt-1" autocomplete="username" required maxlength="24"></label>
+<label class="block text-xs text-slate-400">รหัสผ่าน<input id="loginPass" type="password" class="field mt-1" autocomplete="current-password" required></label>
+<button class="btn btn-primary w-full" type="submit"><i class="fa-solid fa-right-to-bracket mr-2"></i>เข้าสู่ระบบ</button>
+</form><p class="text-center text-xs text-slate-400 mt-6">ยังไม่มีบัญชี? <button class="text-cyan-300" onclick="showAuth('register')" type="button">สมัครสมาชิก</button></p>
+</div>
+<div id="registerBox" class="hidden-section relative">
+<div class="text-center mb-7"><div class="text-purple-400 text-4xl mb-2"><i class="fa-solid fa-user-plus"></i></div><h2 class="text-3xl font-bold text-purple-300">REGISTER</h2><p class="text-xs text-slate-400 mt-2">สร้างบัญชีใหม่</p></div>
+<form id="regForm" class="space-y-4">
+<label class="block text-xs text-slate-400">ชื่อผู้ใช้ (3–24 ตัวอักษร)<input id="regUser" class="field mt-1" autocomplete="username" minlength="3" maxlength="24" pattern="[A-Za-z0-9_ก-๙]+" required></label>
+<label class="block text-xs text-slate-400">รหัสผ่าน (อย่างน้อย 6 ตัว)<input id="regPass" type="password" class="field mt-1" autocomplete="new-password" minlength="6" required></label>
+<label class="block text-xs text-slate-400">ยืนยันรหัสผ่าน<input id="regConfirm" type="password" class="field mt-1" autocomplete="new-password" minlength="6" required></label>
+<button class="btn w-full bg-gradient-to-r from-purple-600 to-pink-600" type="submit">สมัครสมาชิก</button>
+</form><p class="text-center text-xs text-slate-400 mt-6">มีบัญชีแล้ว? <button class="text-purple-300" onclick="showAuth('login')" type="button">เข้าสู่ระบบ</button></p>
+</div>
+<p class="text-[10px] text-amber-300/80 mt-6 text-center">เดโมนี้เก็บข้อมูลในเบราว์เซอร์เครื่องนี้เท่านั้น</p>
+</section>
+</main>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden-section max-w-7xl mx-auto">
+<nav class="glass rounded-2xl p-4 flex flex-wrap gap-3 items-center justify-between">
+<div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-cyan-500/15 text-cyan-300 flex items-center justify-center"><i class="fa-solid fa-user-astronaut"></i></div><div><p class="text-xs text-slate-400">เข้าสู่ระบบในชื่อ</p><b id="userDisplay">User</b></div></div>
+<button class="btn btn-danger" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket mr-1"></i>ออกจากระบบ</button>
+</nav>
+<header class="text-center my-8"><h1 class="text-3xl md:text-5xl font-bold bg-gradient-to-r from-cyan-300 via-indigo-300 to-purple-400 bg-clip-text text-transparent">GLOBAL MOD HUB</h1><p class="text-slate-400 text-xs md:text-sm mt-3">ศูนย์รวมรายการ Mod พร้อมรูปภาพและรายละเอียด</p></header>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+<div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">รายการ Mod ทั้งหมด</p><b id="modCount" class="text-2xl text-cyan-300">0</b></div>
+<div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">สมาชิกในเครื่องนี้</p><b id="userCount" class="text-2xl text-indigo-300">0</b></div>
+<div class="glass rounded-xl p-4"><p class="text-xs text-slate-400">รายการของฉัน</p><b id="myCount" class="text-2xl text-purple-300">0</b></div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<section class="lg:col-span-1">
+<div class="glass rounded-2xl p-5 lg:sticky lg:top-5">
+<h2 id="formTitle" class="font-semibold text-cyan-300 mb-4 border-b border-slate-700 pb-3"><i class="fa-solid fa-folder-plus mr-2"></i>เพิ่มรายการ Mod</h2>
+<form id="modForm" class="space-y-3">
+<input id="editId" type="hidden">
+<label class="block text-xs text-slate-400">ชื่อ Mod / เกม<input id="modName" class="field mt-1" required maxlength="100" placeholder="ชื่อเกมหรือ Mod"></label>
+<div class="grid grid-cols-2 gap-2">
+<label class="block text-xs text-slate-400">ประเภท<input id="modCategory" class="field mt-1" required maxlength="40" placeholder="เช่น RPG"></label>
+<label class="block text-xs text-slate-400">เวอร์ชัน<input id="modVersion" class="field mt-1" required maxlength="30" placeholder="v1.0"></label>
+</div>
+<label class="block text-xs text-slate-400">รูปภาพจากเครื่อง<input id="modImgFile" type="file" accept="image/*" class="field mt-1"></label>
+<label class="block text-xs text-slate-400">หรือ URL รูปภาพ<input id="modImgUrl" type="url" class="field mt-1" placeholder="https://..."></label>
+<div id="imagePreview" class="hidden rounded-lg overflow-hidden max-h-44"><img id="previewImg" class="w-full max-h-44 object-cover" alt="ตัวอย่างรูป"></div>
+<label class="block text-xs text-slate-400">ลิงก์ดาวน์โหลด<input id="modLink" type="url" class="field mt-1" required placeholder="https://..."></label>
+<label class="block text-xs text-slate-400">คำอธิบาย<textarea id="modDesc" class="field mt-1" rows="4" maxlength="1500" required placeholder="รายละเอียดและวิธีใช้งาน"></textarea></label>
+<button id="saveModBtn" class="btn btn-primary w-full" type="submit"><i class="fa-solid fa-cloud-arrow-up mr-2"></i>บันทึกรายการ</button>
+<button id="cancelEditBtn" class="btn btn-muted w-full hidden-section" type="button" onclick="resetModForm()">ยกเลิกการแก้ไข</button>
+</form>
+<p class="text-[10px] text-slate-500 mt-3">รูปที่อัปโหลดจะถูกเก็บใน LocalStorage และอาจมีข้อจำกัดด้านพื้นที่</p>
+</div>
+</section>
+<section class="lg:col-span-2">
+<div class="flex flex-col sm:flex-row gap-3 mb-4">
+<input id="searchInput" class="field flex-1" placeholder="ค้นหาชื่อ Mod, เกม หรือผู้โพสต์...">
+<select id="categoryFilter" class="field sm:max-w-48"><option value="">ทุกประเภท</option></select>
+</div>
+<div id="modContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+</section>
+</div>
+<footer class="text-center text-xs text-slate-600 py-8">Global Mod Hub • Local demo build</footer>
+</div>
+
+<script>
+'use strict';
+const STORAGE_USERS='modHubUsers_v3', STORAGE_MODS='modHubData_v3', STORAGE_SESSION='modHubSession_v3';
+const $=id=>document.getElementById(id);
+let users=readStore(STORAGE_USERS,[]), mods=readStore(STORAGE_MODS,[]), currentUser=localStorage.getItem(STORAGE_SESSION)||null;
+function readStore(key,fallback){try{const v=JSON.parse(localStorage.getItem(key));return Array.isArray(v)?v:fallback}catch{return fallback}}
+function saveStore(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch(err){alert('บันทึกไม่สำเร็จ: พื้นที่จัดเก็บอาจเต็ม กรุณาลดขนาดรูปภาพหรือเอารายการเก่าออก');return false}}
+function showAuth(which){$('loginBox').classList.toggle('hidden-section',which!=='login');$('registerBox').classList.toggle('hidden-section',which!=='register')}
+function showDashboard(){const logged=!!currentUser;$('authScreen').classList.toggle('hidden-section',logged);$('dashboard').classList.toggle('hidden-section',!logged);document.body.classList.toggle('p-4',true);if(logged){$('userDisplay').textContent=currentUser;renderMods()}}
+function logout(){localStorage.removeItem(STORAGE_SESSION);currentUser=null;showDashboard();showAuth('login')}
+$('regForm').addEventListener('submit',e=>{e.preventDefault();const username=$('regUser').value.trim(),password=$('regPass').value;if(password!==$('regConfirm').value)return alert('รหัสผ่านยืนยันไม่ตรงกัน');if(users.some(u=>u.username.toLowerCase()===username.toLowerCase()))return alert('ชื่อผู้ใช้นี้ถูกใช้แล้ว');users.push({username,password});if(!saveStore(STORAGE_USERS,users)){users.pop();return}e.target.reset();alert('สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ');showAuth('login');$('loginUser').value=username});
+$('loginForm').addEventListener('submit',e=>{e.preventDefault();const username=$('loginUser').value.trim(),password=$('loginPass').value;const found=users.find(u=>u.username.toLowerCase()===username.toLowerCase()&&u.password===password);if(!found)return alert('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');currentUser=found.username;localStorage.setItem(STORAGE_SESSION,currentUser);e.target.reset();showDashboard()});
+function safeUrl(value,image=false){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:''}catch{return ''}}
+function fileToDataURL(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(file)})}
+$('modImgFile').addEventListener('change',async()=>{const file=$('modImgFile').files[0];if(!file)return;if(!file.type.startsWith('image/'))return alert('กรุณาเลือกไฟล์รูปภาพ');if(file.size>2*1024*1024){$('modImgFile').value='';return alert('รูปภาพต้องมีขนาดไม่เกิน 2 MB')}try{const data=await fileToDataURL(file);showPreview(data);$('modImgUrl').value=''}catch{alert('อ่านไฟล์รูปภาพไม่สำเร็จ')}});
+$('modImgUrl').addEventListener('input',()=>{const url=safeUrl($('modImgUrl').value);if(url){showPreview(url);$('modImgFile').value=''}else hidePreview()});
+function showPreview(src){$('previewImg').src=src;$('imagePreview').classList.remove('hidden')}
+function hidePreview(){$('imagePreview').classList.add('hidden');$('previewImg').removeAttribute('src')}
+$('modForm').addEventListener('submit',async e=>{e.preventDefault();const editId=$('editId').value;let image='';const file=$('modImgFile').files[0];if(file){if(file.size>2*1024*1024)return alert('รูปภาพต้องไม่เกิน 2 MB');image=await fileToDataURL(file)}else if($('modImgUrl').value.trim()){image=safeUrl($('modImgUrl').value.trim());if(!image)return alert('URL รูปภาพไม่ถูกต้อง')}else if(editId){image=mods.find(m=>m.id===editId)?.image||''}
+const link=safeUrl($('modLink').value.trim());if(!link)return alert('ลิงก์ดาวน์โหลดต้องเป็น http หรือ https');
+const item={id:editId||crypto.randomUUID(),name:$('modName').value.trim(),category:$('modCategory').value.trim(),version:$('modVersion').value.trim(),image,link,desc:$('modDesc').value.trim(),uploader:editId?(mods.find(m=>m.id===editId)?.uploader||currentUser):currentUser,updatedAt:new Date().toISOString()};
+const previous=mods;mods=editId?mods.map(m=>m.id===editId&&m.uploader===currentUser?item:m):[item,...mods];if(!saveStore(STORAGE_MODS,mods)){mods=previous;return}resetModForm();renderMods();alert(editId?'รายการได้รับการแก้ไขแล้ว':'เพิ่มรายการสำเร็จ')});
+function resetModForm(){$('modForm').reset();$('editId').value='';$('formTitle').innerHTML='<i class="fa-solid fa-folder-plus mr-2"></i>เพิ่มรายการ Mod';$('saveModBtn').innerHTML='<i class="fa-solid fa-cloud-arrow-up mr-2"></i>บันทึกรายการ';$('cancelEditBtn').classList.add('hidden-section');hidePreview()}
+function editMod(id){const m=mods.find(x=>x.id===id);if(!m||m.uploader!==currentUser)return alert('แก้ไขได้เฉพาะรายการของคุณ');$('editId').value=m.id;$('modName').value=m.name;$('modCategory').value=m.category;$('modVersion').value=m.version;$('modImgUrl').value=m.image.startsWith('data:')?'':m.image;$('modLink').value=m.link;$('modDesc').value=m.desc;if(m.image)showPreview(m.image);$('formTitle').textContent='แก้ไขรายการ Mod';$('saveModBtn').textContent='บันทึกการแก้ไข';$('cancelEditBtn').classList.remove('hidden-section');window.scrollTo({top:0,behavior:'smooth'})}
+function deleteMod(id){const m=mods.find(x=>x.id===id);if(!m||m.uploader!==currentUser)return alert('ลบได้เฉพาะรายการของคุณ');if(!confirm('ต้องการลบรายการนี้หรือไม่?'))return;const old=mods;mods=mods.filter(x=>x.id!==id);if(saveStore(STORAGE_MODS,mods))renderMods();else mods=old}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderMods(){const query=$('searchInput').value.trim().toLowerCase(),category=$('categoryFilter').value;const categories=[...new Set(mods.map(m=>m.category).filter(Boolean))].sort();$('categoryFilter').innerHTML='<option value="">ทุกประเภท</option>'+categories.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');$('categoryFilter').value=categories.includes(category)?category:'';
+$('modCount').textContent=mods.length;$('userCount').textContent=users.length;$('myCount').textContent=mods.filter(m=>m.uploader===currentUser).length;
+const filtered=mods.filter(m=>(!category||m.category===category)&&[m.name,m.category,m.uploader,m.desc].some(v=>String(v||'').toLowerCase().includes(query)));
+$('modContainer').innerHTML='';if(!filtered.length){$('modContainer').innerHTML='<div class="glass rounded-2xl p-10 text-center text-slate-400 md:col-span-2"><i class="fa-solid fa-gamepad text-4xl mb-3 block text-slate-600"></i>ไม่พบรายการ Mod</div>';return}
+filtered.forEach(m=>{const card=document.createElement('article');card.className='glass rounded-2xl overflow-hidden glow-card flex flex-col';const img=safeUrl(m.image)|| (String(m.image).startsWith('data:image/')?m.image:'');card.innerHTML=`<div class="card-image">${img?`<img src="${img}" alt="${esc(m.name)}" loading="lazy">`:'<i class="fa-solid fa-image text-4xl text-slate-700"></i>'}</div><div class="p-4 flex-1"><div class="flex justify-between gap-2 mb-2"><span class="text-[11px] bg-cyan-950 text-cyan-300 border border-cyan-900 rounded-md px-2 py-1">${esc(m.category)}</span><span class="text-[11px] bg-indigo-600/70 rounded-full px-2 py-1">${esc(m.version)}</span></div><h3 class="font-semibold mb-1 break-words">${esc(m.name)}</h3><p class="text-[11px] text-slate-400 mb-3">โดย <span class="text-indigo-300">${esc(m.uploader)}</span> · ${new Date(m.updatedAt).toLocaleDateString('th-TH')}</p><p class="text-xs text-slate-300 bg-slate-950/40 p-3 rounded-lg line-clamp-3 whitespace-pre-wrap">${esc(m.desc)}</p></div><div class="p-4 pt-0 flex gap-2"><a href="${esc(m.link)}" target="_blank" rel="noopener noreferrer" class="btn btn-primary flex-1 text-center"><i class="fa-solid fa-download mr-1"></i>ดาวน์โหลด</a>${m.uploader===currentUser?`<button class="btn btn-muted" data-edit="${esc(m.id)}" title="แก้ไข"><i class="fa-solid fa-pen"></i></button><button class="btn btn-danger" data-delete="${esc(m.id)}" title="ลบ"><i class="fa-solid fa-trash"></i></button>`:''}</div>`;$('modContainer').appendChild(card)});
+$('modContainer').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editMod(b.dataset.edit)));$('modContainer').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteMod(b.dataset.delete)))}
+$('searchInput').addEventListener('input',renderMods);$('categoryFilter').addEventListener('change',renderMods);
+showDashboard();
+</script>
+</body>
+</html>
