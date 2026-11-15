@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROX + MV Numeric Decoder & ZIP Loader v5.1 (Fixed)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #090d16;
+            --card-bg: #111827;
+            --panel-bg: #1f2937;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #38bdf8;
+            --accent-hover: #0284c7;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --border: #374151;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 960px;
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+        h1 {
+            margin-top: 0;
+            font-size: 1.55rem;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: bold;
+        }
+        .badge.warn {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        input[type="text"], input[type="number"], textarea {
+            width: 100%;
+            background: #090d16;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        button {
+            background: var(--accent);
+            color: #090d16;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: var(--accent-hover);
+            color: #fff;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        button.secondary {
+            background: var(--panel-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        button.secondary:hover {
+            background: #374151;
+        }
+        button.success {
+            background: var(--success);
+            color: #090d16;
+        }
+        button.success:hover {
+            background: #059669;
+            color: #fff;
+        }
+        .info-box {
+            background: rgba(56, 189, 248, 0.08);
+            border-left: 4px solid var(--accent);
+            padding: 14px 16px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            margin: 16px 0;
+            line-height: 1.6;
+        }
+        .progress-wrap {
+            display: none;
+            margin-top: 12px;
+            background: #090d16;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 10px;
+            background: #1f2937;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--success);
+            transition: width 0.15s;
+        }
+        .status {
+            color: var(--success);
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            font-size: 0.92rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ROX + MV Numeric Decoder & ZIP Loader v5.1 (Fixed)</h1>
+    <div class="badge-row">
+        <span class="badge">Delta Executor Ready</span>
+        <span class="badge">ตัวถอดรหัสเป็นตัวเลขล้วน 100%</span>
+        <span class="badge warn">เขาวงกตไฟล์ลวง 20,000 ไฟล์ใน ZIP</span>
+    </div>
+
+    <div class="grid-4">
+        <div class="form-group">
+            <label>คีย์ชั้นที่ 1 (ROX / XOR Key)</label>
+            <input type="number" id="xorKey" value="137" min="1" max="255">
+        </div>
+        <div class="form-group">
+            <label>คีย์ชั้นที่ 2 (MV Offset)</label>
+            <input type="number" id="mvOffset" value="2840" min="100" max="99999">
+        </div>
+        <div class="form-group">
+            <label>คีย์แปลงตัวเลขตัวถอดรหัส (Num Key)</label>
+            <input type="number" id="numKey" value="749" min="11" max="9999">
+        </div>
+        <div class="form-group">
+            <label>จำนวนไฟล์ทั้งหมดใน ZIP (รวมไฟล์ลวง)</label>
+            <input type="number" id="totalZipFiles" value="20000" min="500" max="50000">
+        </div>
+    </div>
+
+    <div class="grid-4">
+        <div class="form-group">
+            <label>ชื่อไฟล์ .zip ใน Workspace</label>
+            <input type="text" id="zipFileName" value="MV_Decoder_Parts.zip">
+        </div>
+        <div class="form-group" style="display:flex; align-items:flex-end;">
+            <button class="secondary" style="width:100%;" onclick="randomizeAllKeys()">สุ่มคีย์ใหม่ทั้งหมด</button>
+        </div>
+    </div>
+
+    <!-- ส่วนที่ 1 -->
+    <div class="form-group">
+        <label>1. โค้ดต้นฉบับ (Source Script) — <span id="sourceCount">0</span> ตัวอักษร</label>
+        <textarea id="sourceScript" placeholder='วางโค้ด Lua ต้นฉบับของคุณที่นี่ เช่น print("สวัสดี Delta v5!")' oninput="updateCounts()"></textarea>
+        <div class="btn-group">
+            <button onclick="generateSystem()">สร้างระบบเข้ารหัส + ตัวถอดรหัสตัวเลข + แผนที่ 20,000 ไฟล์</button>
+        </div>
+    </div>
+
+    <hr style="border-color: var(--border); margin: 22px 0;">
+
+    <!-- ส่วนที่ 2 -->
+    <div class="form-group">
+        <label>2. สคริปต์ตัวรันหลัก (ส่งให้ผู้ใช้งาน / รันใน Delta) — <span id="mainCount">0</span> ชุดรหัส</label>
+        <textarea id="mainRunnerOutput" readonly placeholder="สคริปต์ตัวรันหลักที่บรรจุแผนที่พิกัดลับและตัวแปลงตัวเลขกลับเป็นภาษาอังกฤษจะแสดงที่นี่..."></textarea>
+        <div class="btn-group">
+            <button class="secondary" onclick="copyText('mainRunnerOutput')">คัดลอกสคริปต์หลัก</button>
+            <button class="secondary" onclick="downloadMainLua()">โหลดสคริปต์หลัก (.lua)</button>
+        </div>
+    </div>
+
+    <div class="info-box">
+        <strong>กลไกความปลอดภัยระดับสูง (v5):</strong><br>
+        1. <strong>ตัวถอดรหัสเป็นตัวเลขล้วน + ขยายขนาดซับซ้อน:</strong> โค้ดตัวถอดรหัสจะถูกหุ้มด้วยสมการคณิตศาสตร์และตัวแปรซ้อนหลายชั้น แล้วแปลงทุกตัวอักษรเป็น <strong>ชุดตัวเลขล้วน</strong> ไม่มีตัวอักษรภาษาอังกฤษหลงเหลืออยู่ในไฟล์ย่อย<br>
+        2. <strong>เขาวงกต 20,000 ไฟล์ใน ZIP:</strong> ไฟล์ชิ้นส่วนจริงจะถูกซ่อนกระจายอยู่ตามโฟลเดอร์ย่อยปะปนกับไฟล์ขยะตัวเลขปลอมรวม <strong>20,000 ไฟล์</strong> มีเพียงสคริปต์ตัวรันหลักเท่านั้นที่ถือ <strong>ตารางพิกัดลับ</strong> สำหรับดึงเฉพาะไฟล์จริงมาประกอบทีละส่วน แปลงตัวเลขกลับเป็นภาษาอังกฤษ แล้วสั่งถอดรหัสโค้ดต้นฉบับ
+    </div>
+
+    <!-- ส่วนที่ 3 -->
+    <div class="form-group">
+        <label>3. ตัวอย่างชุดตัวเลขของตัวถอดรหัส (<span id="realPartBadge">0</span> ไฟล์จริง ซ่อนใน <span id="totalPartBadge">20,000</span> ไฟล์)</label>
+        <textarea id="decoderPreview" readonly placeholder="ตัวอย่างชุดตัวเลขของตัวถอดรหัสจะแสดงที่นี่..."></textarea>
+        <div class="btn-group">
+            <button id="zipBtn" class="success" onclick="downloadDecoderZip()">ดาวน์โหลดไฟล์เขาวงกต 20,000 ไฟล์ (.zip)</button>
+        </div>
+        <div id="progressWrap" class="progress-wrap">
+            <div id="progressText" style="font-size:0.88rem; color:var(--accent);">กำลังสร้างไฟล์ใน ZIP: 0 / 20,000...</div>
+            <div class="progress-bar-bg">
+                <div id="progressFill" class="progress-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMsg" class="status">ดำเนินการสำเร็จ!</div>
+    <div class="info-box">
+        <strong>v5.1 แก้ไข:</strong> แก้การอ่านรหัส Base36 ที่มีตัวคั่นสุ่มหัว/ท้าย และบังคับเลขพิกัดไฟล์ให้เป็นจำนวนเต็มก่อนค้นหาใน ZIP
+        หากยังพบข้อความ “ไม่พบชิ้นส่วนพิกัดลับ” ให้สร้างไฟล์ Runner และ ZIP ใหม่จากหน้าเว็บเวอร์ชันนี้ทั้งคู่ แล้ววาง ZIP ชื่อเดียวกับที่ตั้งไว้ใน Workspace
+    </div>
+</div>
+
+<script>
+    let numericChunks = [];
+    let secretCoordinates = [];
+    let generatedTotalFiles = 20000;
+
+    function randomizeAllKeys() {
+        document.getElementById('xorKey').value = Math.floor(Math.random() * 200) + 31;
+        document.getElementById('mvOffset').value = Math.floor(Math.random() * 6000) + 1200;
+        document.getElementById('numKey').value = Math.floor(Math.random() * 8000) + 500;
+    }
+
+    function updateCounts() {
+        const src = document.getElementById('sourceScript').value;
+        document.getElementById('sourceCount').innerText = src.length;
+    }
+
+    function randVar(len = 10) {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let res = chars[Math.floor(Math.random() * chars.length)];
+        const alnum = chars + "0123456789_";
+        for (let i = 1; i < len; i++) {
+            res += alnum[Math.floor(Math.random() * alnum.length)];
+        }
+        return res;
+    }
+
+    // เข้ารหัส UTF-8 Bytes -> XOR -> MV Offset -> Base36 + Random Salt
+    function encodePayloadUTF8(text, xorKey, mvOffset) {
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(text);
+        const saltChars = "ghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let encodedParts = [];
+
+        for (let i = 0; i < bytes.length; i++) {
+            let byteVal = bytes[i];
+            let xored = byteVal ^ ((xorKey + (i % 29)) & 0xFF);
+            let shifted = xored + mvOffset + (i % 13);
+            let b36 = shifted.toString(36).toUpperCase();
+            let s1 = saltChars[Math.floor(Math.random() * saltChars.length)];
+            let s2 = saltChars[Math.floor(Math.random() * saltChars.length)];
+            encodedParts.push(s1 + b36 + s2);
+        }
+        return encodedParts;
+    }
+
+    // สร้างโค้ดตัวถอดรหัส Lua ที่ซับซ้อน (Obfuscated & Bloated Math Layers)
+    function buildHeavyObfuscatedDecoderLua() {
+        const vFn = randVar(12);
+        const vP = randVar(10);
+        const vK = randVar(10);
+        const vO = randVar(10);
+        const vRes = randVar(11);
+        const vIdx = randVar(9);
+        const vTok = randVar(10);
+        const vClean = randVar(11);
+        const vNum = randVar(10);
+        const vXor = randVar(10);
+        const vByte = randVar(10);
+        const vJunk1 = randVar(12);
+        const vJunk2 = randVar(12);
+        const vState = randVar(10);
+
+        const c1 = Math.floor(Math.random() * 500) + 100;
+        const c2 = Math.floor(Math.random() * 500) + 100;
+
+        return `local ${vJunk1} = function(a, b) local t = 0 for x = 1, 4 do t = (t + (a * x) + b) % 65535 end return t end
+local ${vJunk2} = {${c1}, ${c2}, ${c1 + c2}, ${c1 * 2}, ${c2 * 3}}
+local function ${vFn}(${vP}, ${vK}, ${vO})
+    local ${vState} = ${vJunk1}(${c1}, ${c2})
+    if ${vState} < 0 then return "" end
+    local ${vRes} = {}
+    local ${vIdx} = 0
+    for ${vTok} in string.gmatch(${vP}, "[^%-]+") do
+        local ${vClean} = string.sub(${vTok}, 2, -2)
+        local ${vNum} = (tonumber(${vClean}, 36) or 0) - ${vO} - (${vIdx} % 13)
+        local ${vXor} = (${vK} + (${vIdx} % 29)) % 256
+        local ${vByte} = bit32.bxor(${vNum}, ${vXor}) % 256
+        ${vRes}[#${vRes} + 1] = string.char(${vByte})
+        ${vIdx} = ${vIdx} + 1
+    end
+    return table.concat(${vRes})
+end
+return ${vFn}`;
+    }
+
+    // แปลงโค้ดตัวถอดรหัสเป็นชุดตัวเลขล้วน 100%
+    function encodeDecoderToPureNumbers(luaCode, numKey) {
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(luaCode);
+        let chunks = [];
+        for (let i = 0; i < bytes.length; i++) {
+            // สูตรแปลงไบต์เป็นตัวเลขล้วนหลายหลักที่ผูกกับตำแหน่ง i และ numKey
+            let multiplier = ((numKey + i) % 89) + 11; // 11..99
+            let offset = (numKey * 7) + (i * 13);
+            let numVal = (bytes[i] * multiplier) + offset;
+            chunks.push(String(numVal));
+        }
+        return chunks;
+    }
+
+    function generateSystem() {
+        const source = document.getElementById('sourceScript').value;
+        if (!source.trim()) {
+            alert("กรุณาวางโค้ด Lua ต้นฉบับก่อนครับ");
+            return;
+        }
+
+        const xorKey = parseInt(document.getElementById('xorKey').value) || 137;
+        const mvOffset = parseInt(document.getElementById('mvOffset').value) || 2840;
+        const numKey = parseInt(document.getElementById('numKey').value) || 749;
+        let totalFiles = parseInt(document.getElementById('totalZipFiles').value) || 20000;
+        if (totalFiles < 1000) totalFiles = 1000;
+        if (totalFiles > 50000) totalFiles = 50000;
+        generatedTotalFiles = totalFiles;
+
+        const zipFileName = document.getElementById('zipFileName').value.trim() || "MV_Decoder_Parts.zip";
+
+        // 1. เข้ารหัสสคริปต์จริง
+        const encodedArray = encodePayloadUTF8(source, xorKey, mvOffset);
+        const payloadString = encodedArray.join("-");
+
+        // 2. สร้างตัวถอดรหัสแบบซับซ้อนและแปลงเป็นตัวเลขล้วน
+        const heavyDecoderLua = buildHeavyObfuscatedDecoderLua();
+        numericChunks = encodeDecoderToPureNumbers(heavyDecoderLua, numKey);
+
+        // 3. สุ่มพิกัดลับสำหรับซ่อนไฟล์จริงลงในไฟล์ทั้งหมด (เช่น 20,000 ไฟล์)
+        const chosenIndices = new Set();
+        while (chosenIndices.size < numericChunks.length) {
+            let randPos = Math.floor(Math.random() * totalFiles) + 1;
+            chosenIndices.add(randPos);
+        }
+        secretCoordinates = Array.from(chosenIndices);
+
+        // เข้ารหัสตารางพิกัดลับด้วย numKey เพื่อไม่ให้เห็นเลขไฟล์ตรงๆ ในสคริปต์หลัก
+        const obfuscatedCoords = secretCoordinates.map((pos, idx) => (pos * 3) + numKey + idx);
+
+        // 4. สร้างสคริปต์ตัวรันหลักสำหรับ Delta Executor
+        const mainRunnerLua = `--[[ ROX + MV Numeric Decoder & 20K ZIP Maze Auto-Assembler v5 ]]--
+local zipName = "${zipFileName}"
+local numKey = ${numKey}
+local key1 = ${xorKey}
+local key2 = ${mvOffset}
+local secretMap = {${obfuscatedCoords.join(",")}}
+local payload = "${payloadString}"
+
+if not isfile(zipName) then
+    warn("[MV System] ไม่พบไฟล์ " .. zipName .. " ในโฟลเดอร์ Workspace")
+    return
+end
+
+print("[MV System] ตรวจพบ " .. zipName .. " กำลังสแกนโครงสร้างเขาวงกตไฟล์...")
+local rawZip = readfile(zipName)
+
+-- สร้างตารางค้นหาไฟล์ทั้งหมดใน ZIP อย่างรวดเร็วในหน่วยความจำ
+local zipIndex = {}
+local pos = 1
+local len = #rawZip
+
+while pos <= len - 30 do
+    local sig = string.byte(rawZip, pos)
+        + string.byte(rawZip, pos + 1) * 256
+        + string.byte(rawZip, pos + 2) * 65536
+        + string.byte(rawZip, pos + 3) * 16777216
+
+    if sig == 0x04034b50 then
+        local compMethod = string.byte(rawZip, pos + 8) + string.byte(rawZip, pos + 9) * 256
+        local compSize = string.byte(rawZip, pos + 18)
+            + string.byte(rawZip, pos + 19) * 256
+            + string.byte(rawZip, pos + 20) * 65536
+            + string.byte(rawZip, pos + 21) * 16777216
+        local nameLen = string.byte(rawZip, pos + 26) + string.byte(rawZip, pos + 27) * 256
+        local extraLen = string.byte(rawZip, pos + 28) + string.byte(rawZip, pos + 29) * 256
+
+        local fileName = string.sub(rawZip, pos + 30, pos + 30 + nameLen - 1)
+        local dataStart = pos + 30 + nameLen + extraLen
+        local dataEnd = dataStart + compSize - 1
+
+        if compMethod == 0 and compSize > 0 then
+            local shortName = string.match(fileName, "([^/]+)$") or fileName
+            zipIndex[shortName] = string.sub(rawZip, dataStart, dataEnd)
+        end
+        pos = dataEnd + 1
+    else
+        pos = pos + 1
+    end
+end
+
+-- ดึงชิ้นส่วนตัวเลขตามพิกัดลับและแปลงกลับเป็นภาษาอังกฤษทีละส่วน
+local assembledEnglishChars = {}
+for step = 1, #secretMap do
+    local realFileId = math.floor(((secretMap[step] - numKey - (step - 1)) / 3) + 0.5)
+    local targetFile = "node_" .. string.format("%.0f", realFileId) .. ".dat"
+    local numStr = zipIndex[targetFile]
+
+    if not numStr then
+        warn("[MV System] ไม่พบชิ้นส่วนพิกัดลับที่ขั้นตอน: " .. tostring(step))
+        return
+    end
+
+    local numVal = tonumber(numStr)
+    if not numVal then
+        warn("[MV System] ข้อมูลตัวเลขผิดพลาดที่ขั้นตอน: " .. tostring(step))
+        return
+    end
+
+    local idx0 = step - 1
+    local multiplier = ((numKey + idx0) % 89) + 11
+    local offset = (numKey * 7) + (idx0 * 13)
+    local charByte = math.floor((numVal - offset) / multiplier) % 256
+    assembledEnglishChars[step] = string.char(charByte)
+end
+
+print("[MV System] ประกอบตัวถอดรหัสจากตัวเลขกลับเป็นโค้ดสำเร็จ (" .. #assembledEnglishChars .. " ชิ้นส่วน)")
+local fullDecoderLua = table.concat(assembledEnglishChars)
+
+local loaderFunc, err = loadstring(fullDecoderLua)
+if not loaderFunc then
+    warn("[MV System] โหลดตัวถอดรหัสไม่สำเร็จ: " .. tostring(err))
+    return
+end
+
+local decodeCore = loaderFunc()
+local finalScript = decodeCore(payload, key1, key2)
+local runMain, runErr = loadstring(finalScript)
+
+if runMain then
+    print("[MV System] ถอดรหัสและเริ่มรันสคริปต์สำเร็จ!")
+    runMain()
+else
+    warn("[MV System] รันสคริปต์ต้นฉบับผิดพลาด: " .. tostring(runErr))
+end`;
+
+        document.getElementById('mainRunnerOutput').value = mainRunnerLua;
+        document.getElementById('mainCount').innerText = encodedArray.length;
+        document.getElementById('decoderPreview').value = numericChunks.join(" ");
+        document.getElementById('realPartBadge').innerText = numericChunks.length;
+        document.getElementById('totalPartBadge').innerText = totalFiles.toLocaleString();
+
+        const status = document.getElementById('statusMsg');
+        status.style.display = 'block';
+        status.innerText = `สร้างระบบสำเร็จ! แปลงตัวถอดรหัสเป็นตัวเลข ${numericChunks.length} ชิ้นส่วน และกำหนดพิกัดลับในไฟล์ทั้งหมด ${totalFiles.toLocaleString()} ไฟล์แล้ว`;
+    }
+
+    // สร้างไฟล์ ZIP ที่มี 20,000 ไฟล์ (ไฟล์จริง + ไฟล์ตัวเลขหลอก)
+    async function downloadDecoderZip() {
+        if (numericChunks.length === 0) {
+            alert("กรุณากดปุ่ม 'สร้างระบบเข้ารหัส' ก่อนดาวน์โหลดครับ");
+            return;
+        }
+
+        const zipBtn = document.getElementById('zipBtn');
+        const progressWrap = document.getElementById('progressWrap');
+        const progressText = document.getElementById('progressText');
+        const progressFill = document.getElementById('progressFill');
+
+        zipBtn.disabled = true;
+        progressWrap.style.display = 'block';
+
+        const zipFileName = document.getElementById('zipFileName').value.trim() || "MV_Decoder_Parts.zip";
+        const numKey = parseInt(document.getElementById('numKey').value) || 749;
+        const zip = new JSZip();
+
+        // สร้าง Map ของพิกัดจริง: fileIndex -> numericString
+        const realFileMap = new Map();
+        for (let i = 0; i < secretCoordinates.length; i++) {
+            realFileMap.set(secretCoordinates[i], numericChunks[i]);
+        }
+
+        const batchSize = 2000;
+        let current = 1;
+
+        function processBatch() {
+            const end = Math.min(current + batchSize - 1, generatedTotalFiles);
+            for (let f = current; f <= end; f++) {
+                // แบ่งโฟลเดอร์ย่อย 50 โฟลเดอร์เพื่อความเป็นระเบียบ
+                const folderNum = (f % 50) + 1;
+                const folderPath = `maze_blk_${folderNum}`;
+                const fileName = `${folderPath}/node_${f}.dat`;
+
+                let content = "";
+                if (realFileMap.has(f)) {
+                    content = realFileMap.get(f);
+                } else {
+                    // สร้างตัวเลขหลอกให้ดูเหมือนข้อมูลจริงทุกประการ
+                    let fakeByte = Math.floor(Math.random() * 95) + 32;
+                    let fakeMult = ((numKey + (f % 300)) % 89) + 11;
+                    let fakeOff = (numKey * 7) + ((f % 300) * 13);
+                    content = String((fakeByte * fakeMult) + fakeOff);
+                }
+
+                zip.file(fileName, content, { compression: "STORE" });
+            }
+
+            const pct = Math.round((end / generatedTotalFiles) * 100);
+            progressText.innerText = `กำลังสร้างเขาวงกตไฟล์ตัวเลข: ${end.toLocaleString()} / ${generatedTotalFiles.toLocaleString()} ไฟล์ (${pct}%)...`;
+            progressFill.style.width = pct + "%";
+
+            if (end < generatedTotalFiles) {
+                current = end + 1;
+                setTimeout(processBatch, 10);
+            } else {
+                progressText.innerText = "กำลังบีบอัดและแพ็กไฟล์ .ZIP กรุณารอสักครู่...";
+                zip.generateAsync({ type: "blob", compression: "STORE" }).then(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = zipFileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 30000);
+
+                    progressText.innerText = `ดาวน์โหลด ${zipFileName} (${generatedTotalFiles.toLocaleString()} ไฟล์) เสร็จสมบูรณ์!`;
+                    zipBtn.disabled = false;
+                }).catch(function(err) {
+                    console.error(err);
+                    progressText.innerText = "สร้าง ZIP ไม่สำเร็จ: " + (err && err.message ? err.message : err);
+                    zipBtn.disabled = false;
+                });
+            }
+        }
+
+        setTimeout(processBatch, 20);
+    }
+
+    function downloadMainLua() {
+        const content = document.getElementById('mainRunnerOutput').value;
+        if (!content) {
+            alert("ยังไม่มีโค้ดสำหรับดาวน์โหลดครับ");
+            return;
+        }
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "MV_Main_Runner_v5.lua";
+        link.click();
+    }
+
+    function copyText(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el.value) return;
+        el.select();
+        document.execCommand("copy");
+        alert("คัดลอกโค้ดเรียบร้อยแล้ว!");
+    }
+</script>
+
+</body>
+</html>
